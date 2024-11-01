@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{703B622E-9670-43FA-9FC0-26965C830672}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{29F3C4BD-8FA7-40EE-84EB-2D01C2A4E4C1}"
+	ProjectSection(SolutionItems) = preProject
+		src\files\.env = src\files\.env
+		src\files\docker-compose.yml = src\files\docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{5C294B31-84D3-4828-9BB2-D22C60921FD6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{F93867D8-8A72-4FDE-BE17-4238AD13DF89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Core.Abstractions", "src\core\EazyQuizy.Core.Abstractions\EazyQuizy.Core.Abstractions.csproj", "{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Core.Grains", "src\core\EazyQuizy.Core.Grains\EazyQuizy.Core.Grains.csproj", "{E41C2A6D-E080-4979-A056-2709AD24A485}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Core.Silo", "src\core\EazyQuizy.Core.Silo\EazyQuizy.Core.Silo.csproj", "{3431A49C-F41B-48C5-A096-C2118570A30B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Api", "src\api\EazyQuizy.Api\EazyQuizy.Api.csproj", "{0F799ECA-D739-4B5E-B600-A763A74A5A2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Api.Protos", "src\api\EazyQuizy.Api.Protos\EazyQuizy.Api.Protos.csproj", "{950B6447-D4FC-44DC-B91B-32D8042A0710}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{29F3C4BD-8FA7-40EE-84EB-2D01C2A4E4C1} = {703B622E-9670-43FA-9FC0-26965C830672}
+		{5C294B31-84D3-4828-9BB2-D22C60921FD6} = {703B622E-9670-43FA-9FC0-26965C830672}
+		{F93867D8-8A72-4FDE-BE17-4238AD13DF89} = {703B622E-9670-43FA-9FC0-26965C830672}
+		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1} = {5C294B31-84D3-4828-9BB2-D22C60921FD6}
+		{E41C2A6D-E080-4979-A056-2709AD24A485} = {5C294B31-84D3-4828-9BB2-D22C60921FD6}
+		{3431A49C-F41B-48C5-A096-C2118570A30B} = {5C294B31-84D3-4828-9BB2-D22C60921FD6}
+		{0F799ECA-D739-4B5E-B600-A763A74A5A2F} = {F93867D8-8A72-4FDE-BE17-4238AD13DF89}
+		{950B6447-D4FC-44DC-B91B-32D8042A0710} = {F93867D8-8A72-4FDE-BE17-4238AD13DF89}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E41C2A6D-E080-4979-A056-2709AD24A485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E41C2A6D-E080-4979-A056-2709AD24A485}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E41C2A6D-E080-4979-A056-2709AD24A485}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E41C2A6D-E080-4979-A056-2709AD24A485}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3431A49C-F41B-48C5-A096-C2118570A30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3431A49C-F41B-48C5-A096-C2118570A30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3431A49C-F41B-48C5-A096-C2118570A30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3431A49C-F41B-48C5-A096-C2118570A30B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F799ECA-D739-4B5E-B600-A763A74A5A2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F799ECA-D739-4B5E-B600-A763A74A5A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F799ECA-D739-4B5E-B600-A763A74A5A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F799ECA-D739-4B5E-B600-A763A74A5A2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{950B6447-D4FC-44DC-B91B-32D8042A0710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{950B6447-D4FC-44DC-B91B-32D8042A0710}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{950B6447-D4FC-44DC-B91B-32D8042A0710}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{950B6447-D4FC-44DC-B91B-32D8042A0710}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
