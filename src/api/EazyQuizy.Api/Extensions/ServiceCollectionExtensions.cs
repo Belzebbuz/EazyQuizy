@@ -12,7 +12,9 @@ public static class ServiceCollectionExtensions
 			options.AddPolicy(name, config => config
 				.AllowAnyMethod()
 				.AllowAnyHeader()
-				.AllowCredentials());
+				.AllowAnyOrigin()
+				.WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding")
+				.SetPreflightMaxAge(TimeSpan.FromHours(1)));
 		});
 		return services;
 	}

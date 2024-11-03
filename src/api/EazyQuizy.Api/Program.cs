@@ -17,14 +17,14 @@ try
 			.MinimumLevel.Information();
 	});
 	builder.Host.AddOrleansClient(builder.Configuration);
-	builder.Services.AddDefaultCorsPolicy("CorsPolicy");
+	builder.Services.AddDefaultCorsPolicy("default");
 	builder.Services.AddAuth(builder.Configuration);
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGeneration(builder.Configuration);
 	builder.Services.AddGrpc().AddJsonTranscoding();
 	
 	var app = builder.Build();
-	app.UseCors("CorsPolicy");
+	
 	
 	app.UseSwagger();
 	app.UseSwaggerUI(c =>
@@ -34,9 +34,17 @@ try
 	
 	app.UseAuthentication();
 	app.UseAuthorization();
+	
+	app.UseRouting();
+	app.UseGrpcWeb(new GrpcWebOptions()
+	{
+		DefaultEnabled = true
+	});
+	app.UseCors("default");
+	
 	app.UseStaticFiles();
 	app.MapFallbackToFile("index.html");
-	app.MapGrpcService<ModulesHandlers>();
+	app.MapGrpcService<ModulesHandlers>().RequireCors("default");
 	app.Run();
 }
 catch (Exception ex)

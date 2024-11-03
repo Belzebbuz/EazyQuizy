@@ -3,7 +3,7 @@ import "google/api/annotations.proto";
 
 option csharp_namespace = "EazyQuizy.Api.Protos.Modules";
 
-service Modules {
+service ModuleService {
   rpc Create (CreateModuleRequest) returns (CreateModuleResponse){
     option (google.api.http) = {
       post: "/v1/modules",
