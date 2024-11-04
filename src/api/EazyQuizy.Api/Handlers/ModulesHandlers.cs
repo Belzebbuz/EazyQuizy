@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EazyQuizy.Api.Handlers;
 
-[AllowAnonymous]
+[Authorize]
 public class ModulesHandlers : ModuleService.ModuleServiceBase
 {
 	public override Task<CreateModuleResponse> Create(CreateModuleRequest request, ServerCallContext context)

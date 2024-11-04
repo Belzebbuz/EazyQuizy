@@ -31,16 +31,15 @@ try
 	{
 		c.OAuthClientId("account");
 	});
-	
+
+	app.UseRouting();
+	app.UseCors("default");
 	app.UseAuthentication();
 	app.UseAuthorization();
-	
-	app.UseRouting();
 	app.UseGrpcWeb(new GrpcWebOptions()
 	{
 		DefaultEnabled = true
 	});
-	app.UseCors("default");
 	
 	app.UseStaticFiles();
 	app.MapFallbackToFile("index.html");
