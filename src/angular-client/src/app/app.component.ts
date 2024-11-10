@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import {createChannel, createClientFactory, Metadata} from 'nice-grpc-web';
 import {CreateModuleRequest, ModuleServiceClient, ModuleServiceDefinition} from '../generated/modules/module';
 import {KeycloakService} from 'keycloak-angular';
+import {GrpcService} from './core/services/grpc.service';
 
 @Component({
   selector: 'app-root',
@@ -11,36 +12,16 @@ import {KeycloakService} from 'keycloak-angular';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent{
   title = 'angular-client';
-  channel = createChannel("http://127.0.0.1:5530");
-  token? : string;
-  clientFactory = createClientFactory().use((call, options) =>
-    call.next(call.request, {
-      ...options,
-      metadata: Metadata(options.metadata).set(
-        'Authorization',
-        `Bearer ${this.token}`,
-      ),
-    }),
-  );
-  client: ModuleServiceClient = this.clientFactory.create(ModuleServiceDefinition, this.channel);
-  constructor(private readonly keycloak: KeycloakService) {
+  client: ModuleServiceClient;
+  constructor(private readonly grpc: GrpcService) {
+    this.client = grpc.getClient(ModuleServiceDefinition)
   }
   async create(){
     let rq = CreateModuleRequest.create();
     rq.name = "value";
     const resp = await this.client.create(rq);
     console.log(resp);
-  }
-  async ngOnInit()  {
-    if (this.keycloak.isLoggedIn()) {
-      this.token = await this.keycloak.getToken();
-      this.keycloak.loadUserProfile().then(user => {
-        console.log(user)
-      }).catch(err => {
-        console.log(err)
-      })
-    }
   }
 }
