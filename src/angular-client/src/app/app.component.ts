@@ -1,14 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {createChannel, createClientFactory, Metadata} from 'nice-grpc-web';
 import {CreateModuleRequest, ModuleServiceClient, ModuleServiceDefinition} from '../generated/modules/module';
-import {KeycloakService} from 'keycloak-angular';
 import {GrpcService} from './core/services/grpc.service';
+import {NavbarComponent} from './features/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

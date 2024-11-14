@@ -22,6 +22,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Api", "src\api\Ea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Api.Protos", "src\api\EazyQuizy.Api.Protos\EazyQuizy.Api.Protos.csproj", "{950B6447-D4FC-44DC-B91B-32D8042A0710}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "easy-auth", "easy-auth", "{24EE9110-080F-4DD7-A8D3-F9756B5D45FD}"
+	ProjectSection(SolutionItems) = preProject
+		src\easy-auth\docker-compose.yml = src\easy-auth\docker-compose.yml
+		src\easy-auth\nginx.conf = src\easy-auth\nginx.conf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +42,7 @@ Global
 		{3431A49C-F41B-48C5-A096-C2118570A30B} = {5C294B31-84D3-4828-9BB2-D22C60921FD6}
 		{0F799ECA-D739-4B5E-B600-A763A74A5A2F} = {F93867D8-8A72-4FDE-BE17-4238AD13DF89}
 		{950B6447-D4FC-44DC-B91B-32D8042A0710} = {F93867D8-8A72-4FDE-BE17-4238AD13DF89}
+		{24EE9110-080F-4DD7-A8D3-F9756B5D45FD} = {703B622E-9670-43FA-9FC0-26965C830672}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

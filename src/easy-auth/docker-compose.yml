@@ -1,0 +1,51 @@
+services:
+  #  nginx: 
+  #    image: nginx:latest
+  #    restart: always
+  #    ports:
+  #      - '80:80'
+  #      - '443:443'
+  #    depends_on:
+  #      - keycloak
+  #    volumes:
+  #      - ./nginx.conf:/etc/nginx/nginx.conf
+  #      - /etc/ssl/certs/easy-auth/easy-auth.ru.crt:/etc/ssl/certs/easy-auth/easy-auth.ru.crt
+  #      - /etc/ssl/certs/easy-auth/easy-auth.ru.key:/etc/ssl/certs/easy-auth/easy-auth.ru.key
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    healthcheck:
+      test: "exit 0"
+    ports:
+      - 5432:5432
+  
+  keycloak:
+    hostname: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    command: start --proxy-headers forwarded
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: postgres
+      KC_DB_PASSWORD: secret
+      KC_DB_USERNAME: postgres
+      KC_DB_SCHEMA: public
+      KC_FEATURES: preview
+      KC_HOSTNAME: https://easy-auth.ru
+      KEYCLOAK_ADMIN: admin
+      KC_PROXY: edge
+      KEYCLOAK_ADMIN_PASSWORD: password
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/easy-auth.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/easy-auth-key.pem
+    volumes:
+      - /etc/ssl/certs/easy-auth/easy-auth.pem:/opt/keycloak/conf/easy-auth.pem
+      - /etc/ssl/certs/easy-auth/easy-auth-key.pem:/opt/keycloak/conf/easy-auth-key.pem
+    ports:
+      - 443:8443
+      - 80:8080
+    depends_on:
+      postgres:
+        condition: service_healthy

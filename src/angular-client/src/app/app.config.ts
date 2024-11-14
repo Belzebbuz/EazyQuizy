@@ -19,16 +19,16 @@ function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
       config: {
-        url: 'http://localhost:8094',
-        realm: 'eazy-quizy',
-        clientId: 'front'
+        url: 'https://easy-auth.ru',
+        realm: 'easy-quiz-test',
+        clientId: 'frontend'
       },
       initOptions: {
-        onLoad: 'login-required',
+        onLoad: 'check-sso',
         checkLoginIframe: false
       },
       bearerExcludedUrls: [],
-      loadUserProfileAtStartUp: true,
+      loadUserProfileAtStartUp: false,
       enableBearerInterceptor: true,
       bearerPrefix: 'Bearer',
     });
