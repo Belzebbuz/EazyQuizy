@@ -13,8 +13,9 @@ public static class ServiceCollectionExtensions
 				.AllowAnyMethod()
 				.AllowAnyHeader()
 				.AllowAnyOrigin()
-				.WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding")
-				.SetPreflightMaxAge(TimeSpan.FromHours(1)));
+				.WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding", "X-Grpc-Web", "User-Agent")
+				.SetPreflightMaxAge(TimeSpan.FromHours(1))
+				.Build());
 		});
 		return services;
 	}

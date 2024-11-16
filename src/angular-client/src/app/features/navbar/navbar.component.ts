@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {KeycloakService} from 'keycloak-angular';
+import {KeycloakEventType, KeycloakService} from 'keycloak-angular';
 
 @Component({
   selector: 'app-navbar',
@@ -20,6 +20,11 @@ export class NavbarComponent implements OnInit {
     if(this.loggedIn){
       const info = await this.keycloak.loadUserProfile();
       this.helloText = `Привет ${info.username}!`
+      this.keycloak.keycloakEvents$.subscribe(event =>{
+        if (event.type == KeycloakEventType.OnTokenExpired) {
+          this.keycloak.updateToken(175);
+        }
+      })
     }
   }
 
@@ -30,5 +35,4 @@ export class NavbarComponent implements OnInit {
       await this.keycloak.login();
     }
   }
-
 }

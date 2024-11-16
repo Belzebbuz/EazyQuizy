@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "EazyQuizy.Api.Protos.Files";
+
+service FileService {
+  rpc UploadFile(stream FileChunk) returns (stream FileUploadStatus);
+}
+message FileChunk {
+  bytes chunk_data = 1;
+}
+
+message FileUploadStatus {
+  int32 percentage_complete = 1;
+  bool is_complete = 2;
+}

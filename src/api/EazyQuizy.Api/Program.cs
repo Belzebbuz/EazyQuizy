@@ -1,9 +1,11 @@
 
 using System.Globalization;
 using EazyQuizy.Api.Extensions;
-using EazyQuizy.Api.Handlers;
+using EazyQuizy.Api.GrpcServices;
+using EazyQuizy.Api.Infrastructure.Extensions;
 using EazyQuizy.Api.Protos;
 using Grpc.Core;
+using Minio;
 
 StaticLogger.EnsureInitialized();
 Log.Information("Server Booting Up...");
@@ -22,7 +24,7 @@ try
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGeneration(builder.Configuration);
 	builder.Services.AddGrpc().AddJsonTranscoding();
-	
+	builder.Services.AddInfrastructure(builder.Configuration);
 	var app = builder.Build();
 	
 	
@@ -43,7 +45,8 @@ try
 	
 	app.UseStaticFiles();
 	app.MapFallbackToFile("index.html");
-	app.MapGrpcService<ModulesHandlers>().RequireCors("default");
+	app.MapGrpcService<ModulesGrpcService>().RequireCors("default");
+	app.MapGrpcService<FileGrpcService>().RequireCors("default");
 	app.Run();
 }
 catch (Exception ex)

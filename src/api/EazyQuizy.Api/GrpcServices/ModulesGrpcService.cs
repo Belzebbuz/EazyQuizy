@@ -2,10 +2,10 @@
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 
-namespace EazyQuizy.Api.Handlers;
+namespace EazyQuizy.Api.GrpcServices;
 
 [Authorize]
-public class ModulesHandlers : ModuleService.ModuleServiceBase
+public class ModulesGrpcService : ModuleService.ModuleServiceBase
 {
 	public override Task<CreateModuleResponse> Create(CreateModuleRequest request, ServerCallContext context)
 	{
@@ -15,3 +15,4 @@ public class ModulesHandlers : ModuleService.ModuleServiceBase
 		});
 	}
 }
+
