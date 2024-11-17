@@ -1,11 +1,9 @@
 
 using System.Globalization;
+using EazyQuizy.Api.Configs.HashiVault;
 using EazyQuizy.Api.Extensions;
 using EazyQuizy.Api.GrpcServices;
 using EazyQuizy.Api.Infrastructure.Extensions;
-using EazyQuizy.Api.Protos;
-using Grpc.Core;
-using Minio;
 
 StaticLogger.EnsureInitialized();
 Log.Information("Server Booting Up...");
@@ -13,18 +11,20 @@ Log.Information("Server Booting Up...");
 try
 {
 	var builder = WebApplication.CreateBuilder(args);
+	builder.Host.UseHashiCorpVault();
+	
 	builder.Host.UseSerilog((_, config) =>
 	{
 		config.WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
 			.MinimumLevel.Information();
 	});
+	builder.Services.AddInfrastructure(builder.Configuration);
 	builder.Host.AddOrleansClient(builder.Configuration);
 	builder.Services.AddDefaultCorsPolicy("default");
 	builder.Services.AddAuth(builder.Configuration);
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGeneration(builder.Configuration);
 	builder.Services.AddGrpc().AddJsonTranscoding();
-	builder.Services.AddInfrastructure(builder.Configuration);
 	var app = builder.Build();
 	
 	

@@ -19,7 +19,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
       config: {
-        url: 'https://easy-auth.ru',
+        url: 'https://easy-auth.ru/keycloak',
         realm: 'easy-quiz-test',
         clientId: 'frontend'
       },

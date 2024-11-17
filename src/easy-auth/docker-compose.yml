@@ -14,6 +14,7 @@ services:
 
   postgres:
     image: postgres:latest
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret
@@ -24,8 +25,9 @@ services:
   
   keycloak:
     hostname: keycloak
+    restart: always
     image: quay.io/keycloak/keycloak:latest
-    command: start --proxy-headers forwarded
+    command: start --proxy-headers forwarded --http-relative-path=/keycloak
     environment:
       KC_DB: postgres
       KC_DB_URL_HOST: postgres
@@ -34,9 +36,9 @@ services:
       KC_DB_USERNAME: postgres
       KC_DB_SCHEMA: public
       KC_FEATURES: preview
-      KC_HOSTNAME: https://easy-auth.ru
+      KC_HOSTNAME: easy-auth.ru
       KEYCLOAK_ADMIN: admin
-      KC_PROXY: edge
+      KC_PROXY: passthrough
       KEYCLOAK_ADMIN_PASSWORD: password
       KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/easy-auth.pem
       KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/easy-auth-key.pem
@@ -44,8 +46,8 @@ services:
       - /etc/ssl/certs/easy-auth/easy-auth.pem:/opt/keycloak/conf/easy-auth.pem
       - /etc/ssl/certs/easy-auth/easy-auth-key.pem:/opt/keycloak/conf/easy-auth-key.pem
     ports:
-      - 443:8443
-      - 80:8080
+      - 8095:8443
+      - 8094:8080
     depends_on:
       postgres:
         condition: service_healthy

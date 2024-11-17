@@ -30,7 +30,7 @@ public class FileService(IMinioClient client, ILogger<FileService> logger) : IFi
 				.WithObjectSize(args.Size)
 				.WithContentType("application/octet-stream");
 		
-			await client.PutObjectAsync(putObjectArgs);
+			var res = await client.PutObjectAsync(putObjectArgs);
 			return Result.Success;
 		}
 		catch (Exception e)
