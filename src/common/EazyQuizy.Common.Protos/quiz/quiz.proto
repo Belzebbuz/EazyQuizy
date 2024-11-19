@@ -1,0 +1,52 @@
+syntax = "proto3";
+import "google/api/annotations.proto";
+
+option csharp_namespace = "EazyQuizy.Common.Grpc.Quiz";
+
+service QuizService {
+  rpc Create (CreateQuizRequest) returns (CreateQuizResponse){
+    option (google.api.http) = {
+      post: "/v1/quiz",
+      body: "*"
+    };
+  }
+  rpc GetInfo (GetQuizInfoRequest) returns (GetQuizInfoResponse){
+    option (google.api.http) = {
+      get: "/v1/quiz/{id}",
+    };
+  }
+}
+
+message CreateQuizRequest {
+  string name = 1;
+}
+message CreateQuizResponse {
+  string id = 1;
+}
+message AddQuestionRequest {
+  string id = 1;
+  SingleAnswerQuestion single_answer_question = 2;
+  MultipleAnswerQuestion multiple_answer_question = 3;
+}
+message AddQuestionResponse{}
+message GetQuizInfoRequest{
+  string id = 1;
+}
+message GetQuizInfoResponse {
+  string id = 1;
+  string name = 2;
+  repeated string questions = 3;
+}
+message SingleAnswerQuestion {
+  string text = 1;
+  int32 order = 2;
+  string correct_answer = 3;
+  repeated string wrong_answers = 4;
+}
+message MultipleAnswerQuestion {
+  string text = 1;
+  int32 order = 2;
+  repeated string correct_answers = 3;
+  repeated string wrong_answers = 4;
+}
+

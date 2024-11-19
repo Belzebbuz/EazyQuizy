@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Options;
+using Throw;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods;
 using VaultSharp.V1.AuthMethods.JWT;
-using VaultSharp.V1.AuthMethods.Token;
 
-namespace EazyQuizy.Api.Configs.HashiVault;
+namespace EazyQuizy.Common.HashiVault;
 
 public class HashiCorpVaultClient : IHashiCorpVaultClient
 {

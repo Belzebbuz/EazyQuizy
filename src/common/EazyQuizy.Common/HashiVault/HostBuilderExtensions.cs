@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Throw;
 
-namespace EazyQuizy.Api.Configs.HashiVault;
+namespace EazyQuizy.Common.HashiVault;
 
 public static class HostBuilderExtensions
 {

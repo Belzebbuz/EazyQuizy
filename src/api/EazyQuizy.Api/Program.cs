@@ -1,9 +1,8 @@
-
 using System.Globalization;
-using EazyQuizy.Api.Configs.HashiVault;
 using EazyQuizy.Api.Extensions;
 using EazyQuizy.Api.GrpcServices;
 using EazyQuizy.Api.Infrastructure.Extensions;
+using EazyQuizy.Common.HashiVault;
 
 StaticLogger.EnsureInitialized();
 Log.Information("Server Booting Up...");
@@ -27,7 +26,6 @@ try
 	builder.Services.AddGrpc().AddJsonTranscoding();
 	var app = builder.Build();
 	
-	
 	app.UseSwagger();
 	app.UseSwaggerUI(c =>
 	{
@@ -45,7 +43,7 @@ try
 	
 	app.UseStaticFiles();
 	app.MapFallbackToFile("index.html");
-	app.MapGrpcService<ModulesGrpcService>().RequireCors("default");
+	app.MapGrpcService<QuizGrpcService>().RequireCors("default");
 	app.MapGrpcService<FileGrpcService>().RequireCors("default");
 	app.Run();
 }

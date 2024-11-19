@@ -1,6 +1,7 @@
 ﻿using EazyQuizy.Core.Grains.Constants;
 using EazyQuizy.Core.Silo.Configs;
 using Orleans.Configuration;
+using Orleans.Serialization;
 using OrleansDashboard;
 using Throw;
 
@@ -14,7 +15,9 @@ public static class OrleansHostExtensions
 		{
 			var siloSettings = hostBuilder.Configuration.GetSection(nameof(SiloConfig)).Get<SiloConfig>();
 			siloSettings.ThrowIfNull("Не установлены настройки Silo");
-
+			silo.Services.AddSerializer(sb => sb.AddProtobufSerializer(
+				type => type.Namespace != null && type.Namespace.StartsWith("EazyQuizy.Common.Grpc"),
+				type =>  type.Namespace != null && type.Namespace.StartsWith("EazyQuizy.Common.Grpc")));
 			silo.UseRedisClustering(options => options.ConfigurationOptions = new()
 				{
 					EndPoints = [new(siloSettings.ClusterConfig.ConnectionString)]

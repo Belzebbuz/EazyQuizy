@@ -1,4 +1,4 @@
-﻿namespace EazyQuizy.Api.Configs.HashiVault;
+﻿namespace EazyQuizy.Common.HashiVault;
 
 /// <summary>
 /// Клиент для работы с HashiCorpVault

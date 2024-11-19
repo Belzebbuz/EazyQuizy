@@ -1,4 +1,4 @@
-﻿namespace EazyQuizy.Api.Configs.HashiVault;
+﻿namespace EazyQuizy.Common.HashiVault;
 
 /// <summary>
 /// Ссылочное свойство конфигурации, ссылающееся на секрет Vault

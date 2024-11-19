@@ -1,4 +1,6 @@
-﻿namespace EazyQuizy.Api.Configs.HashiVault;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace EazyQuizy.Common.HashiVault;
 
 /// <summary>
 /// Поставщик данных из корпоративного хранилища секретов Vault
