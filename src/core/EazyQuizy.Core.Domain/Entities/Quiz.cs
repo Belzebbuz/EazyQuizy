@@ -1,20 +1,22 @@
-﻿using EazyQuizy.Core.Domain.Common;
-using ErrorOr;
+﻿using ErrorOr;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 namespace EazyQuizy.Core.Domain.Entities;
 
-public sealed class Quiz : AuditableEntity<Guid>
+public sealed class Quiz
 {
-	public string Name { get; private set; } = "ErrorName";
-	
+	public string Name { get; private set; } = string.Empty;
 	public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
-	private readonly List<Question> _questions = new();
+	private List<Question> _questions = [];
 
-	public static ErrorOr<Quiz> Create(Guid id, string name)
+	public static ErrorOr<Quiz> Create(string name)
 	{
+		if (string.IsNullOrEmpty(name))
+			return Error.Validation();
 		var entity = new Quiz()
 		{
-			Id = id,
 			Name = name
 		};
 		return entity;
@@ -27,19 +29,21 @@ public sealed class Quiz : AuditableEntity<Guid>
 	}
 }
 
-public abstract class Question : BaseEntity<Guid>
+public abstract class Question
 {
-	public string Text { get; protected set; } = "ErrorName";
+	[BsonGuidRepresentation(GuidRepresentation.Standard)]
+	public Guid Id { get; private set; } = Guid.CreateVersion7();
+	public string Text { get; protected init; } = string.Empty;
 	public string? ImageUrl { get; protected set; }
-	public int Order { get; protected set; }
+	public int Order { get; protected init; }
 }
 
 public class SingleAnswersQuestion : Question
 {
-	public string CorrectAnswer { get; private set; } = "ErrorName";
+	public string CorrectAnswer { get; private set; } = string.Empty;
 	
 	public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
-	private readonly List<string> _wrongAnswers = [];
+	private List<string> _wrongAnswers = [];
 
 	private SingleAnswersQuestion(){}
 	public static ErrorOr<SingleAnswersQuestion> Create(
@@ -50,7 +54,6 @@ public class SingleAnswersQuestion : Question
 	{
 		var entity = new SingleAnswersQuestion()
 		{
-			Id = Guid.CreateVersion7(),
 			Order = order,
 			Text = text,
 			CorrectAnswer = answer
@@ -63,10 +66,10 @@ public class SingleAnswersQuestion : Question
 public class MultipleAnswersQuestion : Question
 {
 	public IReadOnlyCollection<string> CorrectAnswers => _correctAnswers.AsReadOnly();
-	private readonly List<string> _correctAnswers = [];
+	private List<string> _correctAnswers = [];
 	
 	public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
-	private readonly List<string> _wrongAnswers = [];
+	private List<string> _wrongAnswers = [];
 
 	private MultipleAnswersQuestion(){}
 	public static ErrorOr<MultipleAnswersQuestion> Create(
@@ -77,7 +80,6 @@ public class MultipleAnswersQuestion : Question
 	{
 		var entity = new MultipleAnswersQuestion()
 		{
-			Id = Guid.CreateVersion7(),
 			Order = order,
 			Text = text,
 		};

@@ -1,49 +1,75 @@
 ﻿using EazyQuizy.Common.Grpc.Quiz;
 using EazyQuizy.Core.Abstractions.Grains.Quiz;
-using EazyQuizy.Core.Domain.Common;
 using EazyQuizy.Core.Domain.Entities;
-using Microsoft.Extensions.DependencyInjection;
+using EazyQuizy.Core.Grains.Authorize;
+using EazyQuizy.Core.Grains.Common;
+using EazyQuizy.Core.Grains.Constants;
+using Microsoft.Extensions.Logging;
+using NATS.Client.Core;
+using Orleans.Core;
 using Throw;
 
 namespace EazyQuizy.Core.Grains.Quizzes;
 
-public class QuizGrain : Grain, IQuizGrain
+public class QuizGrain(
+	[PersistentState("quiz", StorageConstants.MongoDbStorage)]
+	IStorage<Quiz> state, 
+	INatsConnection producer,
+	ILogger<QuizGrain> logger) : StateGrain<Quiz>(state, producer, logger), IQuizGrain
 {
+
 	public async Task<CreateQuizResponse> CreateAsync(CreateQuizRequest request)
 	{
-		await using var scope = ServiceProvider.CreateAsyncScope();
-		await using var unit = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-		var repository = await unit.GetRepositoryAsync<Quiz>();
-		var quiz = Quiz.Create(this.GetPrimaryKey(), request.Name);
-		quiz.IsError.Throw().IfTrue();
-		await repository.AddRangeAsync([quiz.Value]);
-		await unit.CommitAsync();
-		return new CreateQuizResponse()
+		State.RecordExists.Throw().IfTrue();
+		var quiz = Quiz.Create(request.Name);
+		quiz.IsError.Throw(quiz.FirstError.Description).IfTrue();
+		State.State = quiz.Value;
+		var result = new CreateQuizResponse()
 		{
 			Id = this.GetPrimaryKey().ToString()
 		};
+		await GrainFactory.GetGrain<IAuthorizationGrain>(this.GetPrimaryKey())
+			.InitPolicyAsync();
+		StateChanged();
+		return result;
 	}
 
-	public async Task<GetQuizInfoResponse> GetAsync()
+
+	[AuthorizeGrain(GrainAccessAction.Read)]
+	public Task<GetQuizInfoResponse> GetAsync()
 	{
-		await using var scope = ServiceProvider.CreateAsyncScope();
-		await using var unit = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-		var repository = await unit.GetRepositoryAsync<Quiz>();
-		var query = repository.GetQuery()
-			.Where(q => q.Id == this.GetPrimaryKey());
-		var quiz = await repository.GetFirstAsync(query, q => new 
+		State.RecordExists.Throw().IfFalse();
+		var response = new GetQuizInfoResponse()
 		{
-			q.Id,
-			q.Name,
-			Questions = q.Questions.Select(x => x.Id)
-		}, new());
-		quiz.ThrowIfNull();
-		var result = new GetQuizInfoResponse()
-		{
-			Id = quiz.Id.ToString(),
-			Name = quiz.Name,
-			Questions = { quiz.Questions.Select(x => x.ToString()) }
+			Id = this.GetPrimaryKey().ToString(),
+			Name = State.State.Name,
+			Questions = { State.State.Questions
+				.OrderBy(x => x.Order)
+				.Select(x => x.Id.ToString()) }
 		};
-		return result;
+		return Task.FromResult(response);
+	}
+	
+	[AuthorizeGrain(GrainAccessAction.Update)]
+	public Task<StatusResponse> AddAsync(AddSingleQuestionRequest request)
+	{
+		State.RecordExists.Throw().IfFalse();
+
+		var question = SingleAnswersQuestion.Create(request.Text, 0, request.CorrectAnswer, request.WrongAnswers);
+		question.IsError.Throw(question.FirstError.Description).IfTrue();
+		State.State.AddRange([question.Value]);
+		StateChanged();
+		return Task.FromResult(new StatusResponse());
+	}
+
+	[AuthorizeGrain(GrainAccessAction.Update)]
+	public Task<StatusResponse> AddAsync(AddMultipleQuestionRequest request)
+	{
+		State.RecordExists.Throw().IfFalse();
+		var question = MultipleAnswersQuestion.Create(request.Text, 0, request.CorrectAnswers, request.WrongAnswers);
+		question.IsError.Throw(question.FirstError.Description).IfTrue();
+		State.State.AddRange([question.Value]);
+		StateChanged();
+		return Task.FromResult(new StatusResponse());
 	}
 }

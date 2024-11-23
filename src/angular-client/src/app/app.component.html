@@ -1,4 +1,5 @@
 <app-navbar/>
 <router-outlet />
 <button class="rounded mt-14 m-4 hover:bg-gray-100 border w-24 h-16 text-2xl font-bold" (click)="create()">SEND</button>
+<button class="rounded mt-14 m-4 hover:bg-gray-100 border w-24 h-16 text-2xl font-bold" (click)="listen()">Listen</button>
 <input type="file" (change)="onFileSelected($event.target)" (select)="onFileSelected($event.target)" />

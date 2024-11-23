@@ -14,4 +14,13 @@ public class QuizGrpcService(IClusterClient client) : QuizService.QuizServiceBas
 	public override Task<GetQuizInfoResponse> GetInfo(GetQuizInfoRequest request, ServerCallContext context)
 		=> client.GetGrain<IQuizGrain>(Guid.Parse(request.Id))
 			.GetAsync();
+
+	public override Task<StatusResponse> AddSingleQuestion(AddSingleQuestionRequest request,
+		ServerCallContext context)
+		=> client.GetGrain<IQuizGrain>(Guid.Parse(request.QuizId))
+			.AddAsync(request);
+	public override Task<StatusResponse> AddMultipleQuestion(AddMultipleQuestionRequest request,
+		ServerCallContext context)
+		=> client.GetGrain<IQuizGrain>(Guid.Parse(request.QuizId))
+			.AddAsync(request);
 }

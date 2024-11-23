@@ -1,6 +1,7 @@
 using System.Globalization;
 using EazyQuizy.Api.Extensions;
 using EazyQuizy.Api.GrpcServices;
+using EazyQuizy.Api.GrpcServices.Interceptors;
 using EazyQuizy.Api.Infrastructure.Extensions;
 using EazyQuizy.Common.HashiVault;
 
@@ -23,7 +24,10 @@ try
 	builder.Services.AddAuth(builder.Configuration);
 	builder.Services.AddEndpointsApiExplorer();
 	builder.Services.AddSwaggerGeneration(builder.Configuration);
-	builder.Services.AddGrpc().AddJsonTranscoding();
+	builder.Services.AddGrpc(options =>
+	{
+		options.Interceptors.Add<OrleansMetadataInterceptor>();
+	}).AddJsonTranscoding();
 	var app = builder.Build();
 	
 	app.UseSwagger();

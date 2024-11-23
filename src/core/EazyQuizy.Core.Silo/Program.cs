@@ -1,7 +1,6 @@
 global using Serilog;
 using System.Globalization;
 using EazyQuizy.Common.HashiVault;
-using EazyQuizy.Core.Infrastructure.Database;
 using EazyQuizy.Core.Silo.Extensions;
 
 StaticLogger.EnsureInitialized();
@@ -16,9 +15,7 @@ try
 			.MinimumLevel.Information();
 	});
 	builder.Host.AddOrleans();
-	builder.Services.AddDatabasePersistence(builder.Configuration);
 	var app = builder.Build();
-	await app.InitDatabaseAsync();
 	app.Run();
 }
 catch (Exception ex)

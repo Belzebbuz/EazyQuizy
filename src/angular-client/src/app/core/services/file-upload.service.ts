@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import {DeepPartial} from '../../../generated/modules/module';
 import {GrpcService} from './grpc.service';
 import {Metadata} from 'nice-grpc-web';
-import {FileChunk, FileServiceClient, FileServiceDefinition} from '../../../generated/files/file';
+import {DeepPartial, FileChunk, FileServiceClient, FileServiceDefinition} from '../../../generated/files/file';
 
 @Injectable({
   providedIn: 'root'

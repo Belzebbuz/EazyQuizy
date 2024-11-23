@@ -28,6 +28,7 @@
     "keycloak-angular": "^16.0.1",
     "keycloak-js": "^25.0.6",
     "long": "^5.2.3",
+    "nats.ws": "^1.29.2",
     "nice-grpc-web": "^3.3.5",
     "protobufjs": "^7.4.0",
     "protoc": "^1.1.3",

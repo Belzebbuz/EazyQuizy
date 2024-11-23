@@ -9,4 +9,7 @@ public interface IQuizGrain : IGrainWithGuidKey
 	
 	[ReadOnly]
 	Task<GetQuizInfoResponse> GetAsync();
+
+	Task<StatusResponse> AddAsync(AddSingleQuestionRequest request);
+	Task<StatusResponse> AddAsync(AddMultipleQuestionRequest request);
 }

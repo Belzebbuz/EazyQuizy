@@ -20,6 +20,7 @@
       <None Remove="modules\module.proto" />
       <Protobuf Include="quiz\quiz.proto" GrpcServices="Server" />
       <Protobuf Include="files\file.proto" GrpcServices="Server" />
+      <Protobuf Include="types\types.proto" GrpcServices="Server" />
     </ItemGroup>
 
 </Project>
