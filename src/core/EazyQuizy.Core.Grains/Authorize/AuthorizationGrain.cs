@@ -25,6 +25,7 @@ public interface IAuthorizationGrain : IGrainWithGuidKey
 	Task UpdatePolicyAsync(string userId, IReadOnlySet<string> action);
 	Task UpdateGlobalPolicyAsync(IReadOnlySet<string> action);
 	Task InitPolicyAsync();
+	Task ClearPolicyAsync();
 }
 
 public class AuthGrainPolicy : Dictionary<string, HashSet<string>>
@@ -32,7 +33,7 @@ public class AuthGrainPolicy : Dictionary<string, HashSet<string>>
 	public HashSet<string> GlobalPolicy { get; set; } = [];
 }
 public class AuthorizationGrain(
-	[PersistentState("grain-policies", StorageConstants.MongoDbStorage)]
+	[PersistentState("grain-policies", StorageConstants.RedisStorage)]
 	IStorage<AuthGrainPolicy> state, INatsConnection connection, ILogger<StateGrain<AuthGrainPolicy>> logger) 
 	: StateGrain<AuthGrainPolicy>(state, connection, logger), IAuthorizationGrain
 {
@@ -77,4 +78,6 @@ public class AuthorizationGrain(
 		State.State[currentUserId] = GrainAccessAction.Actions.ToHashSet();
 		return Task.CompletedTask;
 	}
+
+	public Task ClearPolicyAsync() => State.ClearStateAsync();
 }

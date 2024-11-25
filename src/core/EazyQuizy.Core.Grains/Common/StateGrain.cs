@@ -1,6 +1,4 @@
 ﻿using EazyQuizy.Common.Grpc.Types;
-using EazyQuizy.Core.Abstractions.Grains;
-using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using Orleans.Core;
@@ -13,7 +11,7 @@ public abstract class StateGrain<T>(
 	ILogger<StateGrain<T>> logger) : Grain, IGrainWithGuidKey, IIncomingGrainCallFilter
 {
 	protected IStorage<T> State { get; } = state;
-	protected Queue<object> Events { get; } = [];
+	protected  Queue<object> Events { get; } = [];
 	public async Task Invoke(IIncomingGrainCallContext context)
 	{
 		try

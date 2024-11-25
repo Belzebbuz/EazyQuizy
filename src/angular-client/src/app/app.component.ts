@@ -25,7 +25,7 @@ export class AppComponent {
   }
   async listen(){
     for await (let data of this.nats.subscribe<GrainStateChangedEvent>("quiz.update")){
-      console.log("Log from listen " + data.Id)
+      console.log("Log from listen " + data.id)
     }
   }
   async create() {

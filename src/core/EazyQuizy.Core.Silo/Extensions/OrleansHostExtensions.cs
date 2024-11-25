@@ -1,16 +1,18 @@
-﻿using EazyQuizy.Core.Domain.Entities;
+﻿using System.Text.Json;
+using EazyQuizy.Core.Domain.Entities;
 using EazyQuizy.Core.Grains.Common;
 using EazyQuizy.Core.Grains.Constants;
+using EazyQuizy.Core.Grains.Saga;
+using EazyQuizy.Core.Grains.Saga.Abstractions;
 using EazyQuizy.Core.Silo.Configs;
-using EazyQuizy.Core.Silo.MongoConfig;
-using MongoDB.Bson.Serialization;
+using Marten;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
 using NATS.Client.Serializers.Json;
 using Orleans.Configuration;
-using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Serialization;
 using Throw;
+using Weasel.Postgresql.Tables;
 
 namespace EazyQuizy.Core.Silo.Extensions;
 
@@ -18,7 +20,6 @@ public static class OrleansHostExtensions
 {
 	internal static IHostBuilder AddOrleans(this IHostBuilder builder)
 	{
-		MongoDbClassMap.Initialize();
 		builder.UseOrleans((hostBuilder, silo) =>
 		{
 			var siloSettings = hostBuilder.Configuration.GetSection(nameof(SiloConfig)).Get<SiloConfig>();
@@ -29,10 +30,24 @@ public static class OrleansHostExtensions
 			silo.Services.AddNats(1, opt => new NatsOpts()
 			{
 				Url = siloSettings.NatsConfig.ConnectionString,
-				SerializerRegistry = NatsJsonSerializerRegistry.Default
+				SerializerRegistry = new CastomNatsJsonSerializerRegistry(new JsonSerializerOptions()
+				{
+					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+				})
 			});
-			silo.Services.AddKeyedSingleton<IGrainStateSerializer,BsonGrainStateSerializer>(StorageConstants.MongoDbStorage);
-			silo.UseMongoDBClient(siloSettings.MongoConfig.ConnectionString);
+			silo.Services.AddMarten(options =>
+			{
+				options.Connection("host=127.0.0.1;Port=5433;database=eazy-quizy-documents;Username=postgres;Password=postgres;");
+				options.UseSystemTextJsonForSerialization(new JsonSerializerOptions()
+				{
+					IgnoreReadOnlyFields = true,
+					IgnoreReadOnlyProperties = true,
+					AllowOutOfOrderMetadataProperties = true
+				});
+				options.Schema.For<SagaState>().Index(x => x.SagaId, x => x.SortOrder = SortOrder.Desc);
+				options.Schema.For<Tag>().Index(x => x.Name);
+			});
+			silo.Services.AddSagas(typeof(SagaOrchestratorGrain).Assembly);
 			silo.AddIncomingGrainCallFilter<AuthGrainFilter>();
 			silo.UseRedisClustering(options => options.ConfigurationOptions = new()
 				{
@@ -50,13 +65,15 @@ public static class OrleansHostExtensions
 						EndPoints = [new(siloSettings.RedisPersistenceConfig.ConnectionString)]
 					};
 				})
-				.AddMongoDBGrainStorage(StorageConstants.MongoDbStorage, options =>
-				{
-					options.DatabaseName = StorageConstants.MongoDbStorage;
-					options.CreateShardKeyForCosmos = true;
-				})
 				.ConfigureLogging(logging => logging.AddConsole());
 		});
 		return builder;
 	}
+}
+
+public sealed class CastomNatsJsonSerializerRegistry(JsonSerializerOptions options) : INatsSerializerRegistry
+{
+	public INatsSerialize<T> GetSerializer<T>() => new NatsJsonSerializer<T>(options);
+
+	public INatsDeserialize<T> GetDeserializer<T>() => new NatsJsonSerializer<T>(options);
 }

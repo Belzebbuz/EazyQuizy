@@ -1,27 +1,56 @@
-﻿using ErrorOr;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using ErrorOr;
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 
 namespace EazyQuizy.Core.Domain.Entities;
 
-public sealed class Quiz
+public sealed record Quiz
 {
-	public string Name { get; private set; } = string.Empty;
-	public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
-	private List<Question> _questions = [];
-
-	public static ErrorOr<Quiz> Create(string name)
+	[JsonInclude] public Guid Id { get; private set; }
+	[JsonInclude] public string Name { get; private set; } = string.Empty;
+	[JsonInclude] public string? ImageUrl { get; private set; }
+	[JsonIgnore] public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
+	[JsonInclude] private readonly List<Question> _questions = [];
+	[JsonIgnore] public IReadOnlySet<string> Tags => new ReadOnlySet<string>(_tags);
+	[JsonInclude] private readonly HashSet<string> _tags = [];
+	[JsonConstructor]
+	private Quiz(List<Question> _questions, HashSet<string> _tags)
+	{
+		this._questions = _questions;
+		this._tags = _tags;
+	}
+	private Quiz(){}
+	public static ErrorOr<Quiz> Create(Guid id, string name, string? imageUrl = null)
 	{
 		if (string.IsNullOrEmpty(name))
 			return Error.Validation();
 		var entity = new Quiz()
 		{
-			Name = name
+			Id = id,
+			Name = name,
+			ImageUrl = imageUrl
 		};
 		return entity;
 	}
+	public ErrorOr<Success> Update(string name, string? imageUrl = null)
+	{
+		if (string.IsNullOrEmpty(name))
+			return Error.Validation();
+		Name = name;
+		ImageUrl = imageUrl;
+		return Result.Success;
+	}
 
+	public ErrorOr<Success> AddTags(IReadOnlySet<string> tags)
+	{
+		foreach (var tagName in tags)
+		{
+			_tags.Add(tagName);
+		}
+
+		return Result.Success;
+	}
 	public ErrorOr<Success> AddRange(IEnumerable<Question> questions)
 	{
 		_questions.AddRange(questions);
@@ -29,23 +58,32 @@ public sealed class Quiz
 	}
 }
 
-public abstract class Question
+
+[JsonDerivedType(typeof(SingleAnswersQuestion),nameof(SingleAnswersQuestion))]
+[JsonDerivedType(typeof(MultipleAnswersQuestion),nameof(MultipleAnswersQuestion))]
+public class Question
 {
-	[BsonGuidRepresentation(GuidRepresentation.Standard)]
-	public Guid Id { get; private set; } = Guid.CreateVersion7();
-	public string Text { get; protected init; } = string.Empty;
-	public string? ImageUrl { get; protected set; }
-	public int Order { get; protected init; }
+	[JsonInclude] public Guid Id { get; private set; } = Guid.CreateVersion7();
+	[JsonInclude] public string Text { get; protected init; } = string.Empty;
+	[JsonInclude] public string? ImageUrl { get; protected set; }
+	[JsonInclude] public  int Order { get; protected init; }
 }
 
 public class SingleAnswersQuestion : Question
 {
-	public string CorrectAnswer { get; private set; } = string.Empty;
+	[JsonInclude] public string CorrectAnswer { get; private set; } = string.Empty;
 	
-	public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
-	private List<string> _wrongAnswers = [];
+	[JsonIgnore] public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
+	[JsonInclude] private readonly List<string> _wrongAnswers = [];
 
-	private SingleAnswersQuestion(){}
+	[JsonConstructor]
+	private SingleAnswersQuestion(List<string> _wrongAnswers)
+	{
+		this._wrongAnswers = _wrongAnswers;
+	}
+	private SingleAnswersQuestion()
+	{
+	}
 	public static ErrorOr<SingleAnswersQuestion> Create(
 		string text, 
 		int order, 
@@ -65,13 +103,23 @@ public class SingleAnswersQuestion : Question
 
 public class MultipleAnswersQuestion : Question
 {
-	public IReadOnlyCollection<string> CorrectAnswers => _correctAnswers.AsReadOnly();
-	private List<string> _correctAnswers = [];
+	[JsonIgnore] public IReadOnlyCollection<string> CorrectAnswers => _correctAnswers.AsReadOnly();
+	[JsonInclude] private readonly List<string> _correctAnswers = [];
 	
-	public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
-	private List<string> _wrongAnswers = [];
+	[JsonIgnore] public IReadOnlyCollection<string> WrongAnswers => _wrongAnswers.AsReadOnly();
+	[JsonInclude] private readonly List<string> _wrongAnswers = [];
 
-	private MultipleAnswersQuestion(){}
+	[JsonConstructor]
+	private MultipleAnswersQuestion(List<string> _correctAnswers, List<string> _wrongAnswers)
+	{
+		this._correctAnswers = _correctAnswers;
+		this._wrongAnswers = _wrongAnswers;
+	}
+
+	private MultipleAnswersQuestion()
+	{
+	}
+	
 	public static ErrorOr<MultipleAnswersQuestion> Create(
 		string text, 
 		int order, 

@@ -1,10 +1,10 @@
 syntax = "proto3";
 import "google/api/annotations.proto";
-
+import "google/protobuf/wrappers.proto";
 option csharp_namespace = "EazyQuizy.Common.Grpc.Quiz";
 
 service QuizService {
-  rpc Create (CreateQuizRequest) returns (CreateQuizResponse){
+  rpc Create (CreateQuizRequest) returns (StatusResponse){
     option (google.api.http) = {
       post: "/v1/quiz",
       body: "*"
@@ -28,9 +28,9 @@ service QuizService {
     };
   }
 }
-
 message CreateQuizRequest {
   string name = 1;
+  repeated string tags = 2;
 }
 message CreateQuizResponse {
   string id = 1;
@@ -60,4 +60,9 @@ message AddMultipleQuestionRequest {
   repeated string correct_answers = 3;
   repeated string wrong_answers = 4;
 }
-message StatusResponse{};
+message StatusResponse {
+  string operation_id = 1;
+  bool succeeded = 2;
+  google.protobuf.StringValue message = 3;
+  map<string,string> parameters = 4;
+};

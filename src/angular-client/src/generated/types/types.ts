@@ -10,17 +10,22 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 export const protobufPackage = "";
 
 export interface GrainStateChangedEvent {
-  Id: string;
+  id: string;
+}
+
+export interface AddTagsToQuizRequest {
+  tags: string[];
+  quizId: string;
 }
 
 function createBaseGrainStateChangedEvent(): GrainStateChangedEvent {
-  return { Id: "" };
+  return { id: "" };
 }
 
 export const GrainStateChangedEvent: MessageFns<GrainStateChangedEvent> = {
   encode(message: GrainStateChangedEvent, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.Id !== "") {
-      writer.uint32(10).string(message.Id);
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
     }
     return writer;
   },
@@ -37,7 +42,7 @@ export const GrainStateChangedEvent: MessageFns<GrainStateChangedEvent> = {
             break;
           }
 
-          message.Id = reader.string();
+          message.id = reader.string();
           continue;
         }
       }
@@ -54,7 +59,65 @@ export const GrainStateChangedEvent: MessageFns<GrainStateChangedEvent> = {
   },
   fromPartial(object: DeepPartial<GrainStateChangedEvent>): GrainStateChangedEvent {
     const message = createBaseGrainStateChangedEvent();
-    message.Id = object.Id ?? "";
+    message.id = object.id ?? "";
+    return message;
+  },
+};
+
+function createBaseAddTagsToQuizRequest(): AddTagsToQuizRequest {
+  return { tags: [], quizId: "" };
+}
+
+export const AddTagsToQuizRequest: MessageFns<AddTagsToQuizRequest> = {
+  encode(message: AddTagsToQuizRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.tags) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.quizId !== "") {
+      writer.uint32(18).string(message.quizId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddTagsToQuizRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddTagsToQuizRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tags.push(reader.string());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<AddTagsToQuizRequest>): AddTagsToQuizRequest {
+    return AddTagsToQuizRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<AddTagsToQuizRequest>): AddTagsToQuizRequest {
+    const message = createBaseAddTagsToQuizRequest();
+    message.tags = object.tags?.map((e) => e) || [];
+    message.quizId = object.quizId ?? "";
     return message;
   },
 };

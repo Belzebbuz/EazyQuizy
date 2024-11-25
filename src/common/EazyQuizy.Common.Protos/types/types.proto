@@ -3,5 +3,9 @@
 option csharp_namespace = "EazyQuizy.Common.Grpc.Types";
 
 message GrainStateChangedEvent {
-  string Id = 1;
+  string id = 1;
+}
+message AddTagsToQuizRequest{
+  repeated string tags = 1;
+  string quizId = 2;
 }

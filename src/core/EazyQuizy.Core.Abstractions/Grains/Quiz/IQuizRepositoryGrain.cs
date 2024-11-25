@@ -3,7 +3,7 @@ using Orleans.Concurrency;
 
 namespace EazyQuizy.Core.Abstractions.Grains.Quiz;
 
-public interface IQuizGrain : IGrainWithGuidKey
+public interface IQuizRepositoryGrain : IGrainWithGuidKey
 {
 	Task<CreateQuizResponse> CreateAsync(CreateQuizRequest request);
 	
@@ -12,4 +12,5 @@ public interface IQuizGrain : IGrainWithGuidKey
 
 	Task<StatusResponse> AddAsync(AddSingleQuestionRequest request);
 	Task<StatusResponse> AddAsync(AddMultipleQuestionRequest request);
+	Task<StatusResponse> DeleteAsync();
 }
