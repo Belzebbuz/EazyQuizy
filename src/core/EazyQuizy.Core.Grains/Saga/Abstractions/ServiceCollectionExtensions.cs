@@ -5,6 +5,8 @@ namespace EazyQuizy.Core.Grains.Saga.Abstractions;
 
 public static class ServiceCollectionExtensions
 {
+	//TODO
+	//А если разные сборки? SagaCollection должен быть static?
 	public static IServiceCollection AddSagas(this IServiceCollection services, Assembly assembly)
 	{
 		var configurations = assembly.GetTypes()

@@ -14,7 +14,7 @@ public class QuizRepositoryGrain(IDocumentStore documentStore) : Grain, IQuizRep
 	public async Task<CreateQuizResponse> CreateAsync(CreateQuizRequest request)
 	{
 		await using var session = documentStore.LightweightSession();
-		var quiz = Quiz.Create(this.GetPrimaryKey(), request.Name);
+		var quiz = Quiz.Create(this.GetPrimaryKey(), request.Name, request.ImageUrl);
 		quiz.IsError.Throw(quiz.FirstError.Description).IfTrue();
 		var result = new CreateQuizResponse()
 		{
@@ -51,10 +51,12 @@ public class QuizRepositoryGrain(IDocumentStore documentStore) : Grain, IQuizRep
 			Name = quiz.Name,
 			Questions = { quiz.Questions
 				.OrderBy(x => x.Order)
-				.Select(x => x.Id.ToString()) }
+				.Select(x => x.Id.ToString()) },
+			ImageUrl = quiz.ImageUrl
 		};
 		return response;
 	}
+	
 	
 	[AuthorizeGrain(GrainAccessAction.Update)]
 	public async Task<StatusResponse> AddAsync(AddSingleQuestionRequest request)

@@ -30,7 +30,8 @@ service QuizService {
 }
 message CreateQuizRequest {
   string name = 1;
-  repeated string tags = 2;
+  google.protobuf.StringValue image_url = 2;
+  repeated string tags = 3;
 }
 message CreateQuizResponse {
   string id = 1;
@@ -46,7 +47,8 @@ message GetQuizInfoRequest{
 message GetQuizInfoResponse {
   string id = 1;
   string name = 2;
-  repeated string questions = 3;
+  google.protobuf.StringValue image_url = 3;
+  repeated string questions = 4;
 }
 message AddSingleQuestionRequest {
   string quiz_id = 1;

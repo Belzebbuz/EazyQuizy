@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {connect, NatsConnection, StringCodec, Subscription} from 'nats.ws';
+import {connect, jwtAuthenticator, NatsConnection, StringCodec, Subscription} from 'nats.ws';
 import {KeycloakService} from 'keycloak-angular';
 
 @Injectable({
@@ -18,8 +18,7 @@ export class NatsService {
       return;
     this.connection = await connect(
       {
-        servers: ["ws://localhost:8080"],
-
+        servers: ["ws://localhost:8080"]
       },
     )
   }

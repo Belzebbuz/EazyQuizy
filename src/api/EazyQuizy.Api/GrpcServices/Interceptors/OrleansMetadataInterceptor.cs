@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using EazyQuizy.Core.Abstractions.Consts;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 
@@ -12,8 +13,8 @@ public class OrleansMetadataInterceptor : Interceptor
 		var httpContext = context.GetHttpContext();
 		var id = httpContext.User.FindFirstValue("sub");
 		var name = httpContext.User.FindFirstValue("name");
-		RequestContext.Set("userId", id);
-		RequestContext.Set("userName", name);
+		RequestContext.Set(RequestKeys.UserId, id);
+		RequestContext.Set(RequestKeys.Name, name);
 		return continuation(request, context);
 	}
 }

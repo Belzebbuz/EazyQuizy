@@ -1,5 +1,5 @@
 ﻿syntax = "proto3";
-
+import "google/protobuf/wrappers.proto";
 option csharp_namespace = "EazyQuizy.Api.Protos.Files";
 
 service FileService {
@@ -12,4 +12,5 @@ message FileChunk {
 message FileUploadStatus {
   int32 percentage_complete = 1;
   bool is_complete = 2;
+  google.protobuf.StringValue image_url = 3;
 }

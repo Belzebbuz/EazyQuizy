@@ -7,6 +7,7 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { type CallContext, type CallOptions } from "nice-grpc-common";
+import { StringValue } from "../google/protobuf/wrappers";
 
 export const protobufPackage = "";
 
@@ -17,6 +18,7 @@ export interface FileChunk {
 export interface FileUploadStatus {
   percentageComplete: number;
   isComplete: boolean;
+  imageUrl: string | undefined;
 }
 
 function createBaseFileChunk(): FileChunk {
@@ -66,7 +68,7 @@ export const FileChunk: MessageFns<FileChunk> = {
 };
 
 function createBaseFileUploadStatus(): FileUploadStatus {
-  return { percentageComplete: 0, isComplete: false };
+  return { percentageComplete: 0, isComplete: false, imageUrl: undefined };
 }
 
 export const FileUploadStatus: MessageFns<FileUploadStatus> = {
@@ -76,6 +78,9 @@ export const FileUploadStatus: MessageFns<FileUploadStatus> = {
     }
     if (message.isComplete !== false) {
       writer.uint32(16).bool(message.isComplete);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -103,6 +108,14 @@ export const FileUploadStatus: MessageFns<FileUploadStatus> = {
           message.isComplete = reader.bool();
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -119,6 +132,7 @@ export const FileUploadStatus: MessageFns<FileUploadStatus> = {
     const message = createBaseFileUploadStatus();
     message.percentageComplete = object.percentageComplete ?? 0;
     message.isComplete = object.isComplete ?? false;
+    message.imageUrl = object.imageUrl ?? undefined;
     return message;
   },
 };

@@ -15,7 +15,7 @@ public class SagaOrchestratorGrain(
 	private class SagaContext(Guid sagaCompositionId) : ISagaContext
 	{
 		public Guid SagaCompositionId { get; } = sagaCompositionId;
-		public readonly Stack<int> EndedSagas = [];
+		public Stack<int> EndedSagas { get; } = [];
 	}
 	public Task<StatusResponse> EvaluateSagaAsync(CreateQuizRequest request) 
 		=> StartAsync(request);

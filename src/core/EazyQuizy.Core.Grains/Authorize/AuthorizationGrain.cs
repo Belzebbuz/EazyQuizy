@@ -1,4 +1,5 @@
-﻿using EazyQuizy.Core.Abstractions.Grains.Quiz;
+﻿using EazyQuizy.Core.Abstractions.Consts;
+using EazyQuizy.Core.Abstractions.Grains.Quiz;
 using EazyQuizy.Core.Grains.Common;
 using EazyQuizy.Core.Grains.Constants;
 using Microsoft.Extensions.Logging;
@@ -41,7 +42,7 @@ public class AuthorizationGrain(
 	{
 		if(State.State.GlobalPolicy.Contains(action))
 			return Task.FromResult(true);
-		if (RequestContext.Get("userId") is not string userId)
+		if (RequestContext.Get(RequestKeys.UserId) is not string userId)
 			return Task.FromResult(false);
 		if (!State.State.TryGetValue(userId, out var policy))
 			return Task.FromResult(false);
@@ -50,7 +51,7 @@ public class AuthorizationGrain(
 
 	public Task UpdatePolicyAsync(string userId, IReadOnlySet<string> action)
 	{
-		var currentUserId = RequestContext.Get("userId") as string;
+		var currentUserId = RequestContext.Get(RequestKeys.UserId) as string;
 		currentUserId.ThrowIfNull();
 		if(!State.State.TryGetValue(currentUserId, out var currentUserPolicy))
 			throw new UnauthorizedAccessException();
@@ -61,7 +62,7 @@ public class AuthorizationGrain(
 	}
 	public Task UpdateGlobalPolicyAsync(IReadOnlySet<string> action)
 	{
-		var currentUserId = RequestContext.Get("userId") as string;
+		var currentUserId = RequestContext.Get(RequestKeys.UserId) as string;
 		currentUserId.ThrowIfNull();
 		if(!State.State.TryGetValue(currentUserId, out var currentUserPolicy))
 			throw new UnauthorizedAccessException();
@@ -73,7 +74,7 @@ public class AuthorizationGrain(
 	public Task InitPolicyAsync()
 	{
 		State.RecordExists.Throw().IfTrue();
-		var currentUserId = RequestContext.Get("userId") as string;
+		var currentUserId = RequestContext.Get(RequestKeys.UserId) as string;
 		currentUserId.ThrowIfNull();
 		State.State[currentUserId] = GrainAccessAction.Actions.ToHashSet();
 		return Task.CompletedTask;

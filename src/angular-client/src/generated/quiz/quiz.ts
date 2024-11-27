@@ -7,11 +7,14 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { type CallContext, type CallOptions } from "nice-grpc-common";
+import { StringValue } from "../google/protobuf/wrappers";
 
 export const protobufPackage = "";
 
 export interface CreateQuizRequest {
   name: string;
+  imageUrl: string | undefined;
+  tags: string[];
 }
 
 export interface CreateQuizResponse {
@@ -31,6 +34,7 @@ export interface GetQuizInfoRequest {
 export interface GetQuizInfoResponse {
   id: string;
   name: string;
+  imageUrl: string | undefined;
   questions: string[];
 }
 
@@ -49,16 +53,31 @@ export interface AddMultipleQuestionRequest {
 }
 
 export interface StatusResponse {
+  operationId: string;
+  succeeded: boolean;
+  message: string | undefined;
+  parameters: { [key: string]: string };
+}
+
+export interface StatusResponse_ParametersEntry {
+  key: string;
+  value: string;
 }
 
 function createBaseCreateQuizRequest(): CreateQuizRequest {
-  return { name: "" };
+  return { name: "", imageUrl: undefined, tags: [] };
 }
 
 export const CreateQuizRequest: MessageFns<CreateQuizRequest> = {
   encode(message: CreateQuizRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(18).fork()).join();
+    }
+    for (const v of message.tags) {
+      writer.uint32(26).string(v!);
     }
     return writer;
   },
@@ -78,6 +97,22 @@ export const CreateQuizRequest: MessageFns<CreateQuizRequest> = {
           message.name = reader.string();
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.tags.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -93,6 +128,8 @@ export const CreateQuizRequest: MessageFns<CreateQuizRequest> = {
   fromPartial(object: DeepPartial<CreateQuizRequest>): CreateQuizRequest {
     const message = createBaseCreateQuizRequest();
     message.name = object.name ?? "";
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.tags = object.tags?.map((e) => e) || [];
     return message;
   },
 };
@@ -265,7 +302,7 @@ export const GetQuizInfoRequest: MessageFns<GetQuizInfoRequest> = {
 };
 
 function createBaseGetQuizInfoResponse(): GetQuizInfoResponse {
-  return { id: "", name: "", questions: [] };
+  return { id: "", name: "", imageUrl: undefined, questions: [] };
 }
 
 export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
@@ -276,8 +313,11 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
     if (message.name !== "") {
       writer.uint32(18).string(message.name);
     }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(26).fork()).join();
+    }
     for (const v of message.questions) {
-      writer.uint32(26).string(v!);
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -310,6 +350,14 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
             break;
           }
 
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
           message.questions.push(reader.string());
           continue;
         }
@@ -329,6 +377,7 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
     const message = createBaseGetQuizInfoResponse();
     message.id = object.id ?? "";
     message.name = object.name ?? "";
+    message.imageUrl = object.imageUrl ?? undefined;
     message.questions = object.questions?.map((e) => e) || [];
     return message;
   },
@@ -499,11 +548,23 @@ export const AddMultipleQuestionRequest: MessageFns<AddMultipleQuestionRequest> 
 };
 
 function createBaseStatusResponse(): StatusResponse {
-  return {};
+  return { operationId: "", succeeded: false, message: undefined, parameters: {} };
 }
 
 export const StatusResponse: MessageFns<StatusResponse> = {
-  encode(_: StatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+  encode(message: StatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.operationId !== "") {
+      writer.uint32(10).string(message.operationId);
+    }
+    if (message.succeeded !== false) {
+      writer.uint32(16).bool(message.succeeded);
+    }
+    if (message.message !== undefined) {
+      StringValue.encode({ value: message.message! }, writer.uint32(26).fork()).join();
+    }
+    Object.entries(message.parameters).forEach(([key, value]) => {
+      StatusResponse_ParametersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join();
+    });
     return writer;
   },
 
@@ -514,6 +575,41 @@ export const StatusResponse: MessageFns<StatusResponse> = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operationId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.succeeded = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.message = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          const entry4 = StatusResponse_ParametersEntry.decode(reader, reader.uint32());
+          if (entry4.value !== undefined) {
+            message.parameters[entry4.key] = entry4.value;
+          }
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -526,8 +622,78 @@ export const StatusResponse: MessageFns<StatusResponse> = {
   create(base?: DeepPartial<StatusResponse>): StatusResponse {
     return StatusResponse.fromPartial(base ?? {});
   },
-  fromPartial(_: DeepPartial<StatusResponse>): StatusResponse {
+  fromPartial(object: DeepPartial<StatusResponse>): StatusResponse {
     const message = createBaseStatusResponse();
+    message.operationId = object.operationId ?? "";
+    message.succeeded = object.succeeded ?? false;
+    message.message = object.message ?? undefined;
+    message.parameters = Object.entries(object.parameters ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = globalThis.String(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseStatusResponse_ParametersEntry(): StatusResponse_ParametersEntry {
+  return { key: "", value: "" };
+}
+
+export const StatusResponse_ParametersEntry: MessageFns<StatusResponse_ParametersEntry> = {
+  encode(message: StatusResponse_ParametersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StatusResponse_ParametersEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStatusResponse_ParametersEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
+    return StatusResponse_ParametersEntry.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
+    const message = createBaseStatusResponse_ParametersEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
     return message;
   },
 };
@@ -541,7 +707,7 @@ export const QuizServiceDefinition = {
       name: "Create",
       requestType: CreateQuizRequest,
       requestStream: false,
-      responseType: CreateQuizResponse,
+      responseType: StatusResponse,
       responseStream: false,
       options: {
         _unknownFields: { 578365826: [new Uint8Array([13, 34, 8, 47, 118, 49, 47, 113, 117, 105, 122, 58, 1, 42])] },
@@ -637,7 +803,7 @@ export const QuizServiceDefinition = {
 } as const;
 
 export interface QuizServiceImplementation<CallContextExt = {}> {
-  create(request: CreateQuizRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CreateQuizResponse>>;
+  create(request: CreateQuizRequest, context: CallContext & CallContextExt): Promise<DeepPartial<StatusResponse>>;
   addSingleQuestion(
     request: AddSingleQuestionRequest,
     context: CallContext & CallContextExt,
@@ -653,7 +819,7 @@ export interface QuizServiceImplementation<CallContextExt = {}> {
 }
 
 export interface QuizServiceClient<CallOptionsExt = {}> {
-  create(request: DeepPartial<CreateQuizRequest>, options?: CallOptions & CallOptionsExt): Promise<CreateQuizResponse>;
+  create(request: DeepPartial<CreateQuizRequest>, options?: CallOptions & CallOptionsExt): Promise<StatusResponse>;
   addSingleQuestion(
     request: DeepPartial<AddSingleQuestionRequest>,
     options?: CallOptions & CallOptionsExt,

@@ -1,5 +1,6 @@
 ﻿using EazyQuizy.Common.Grpc.Quiz;
 using EazyQuizy.Common.Grpc.Types;
+using EazyQuizy.Core.Abstractions.Consts;
 using EazyQuizy.Core.Grains.Saga.Abstractions;
 using NATS.Client.Core;
 using Throw;
@@ -10,7 +11,7 @@ public class PublicMessageSaga(INatsConnection connection) : ISaga<CreateQuizReq
 {
 	public async Task HandleAsync(CreateQuizRequest message, ISagaContext context)
 	{
-		var userId = RequestContext.Get("userId") as string;
+		var userId = RequestContext.Get(RequestKeys.UserId) as string;
 		userId.ThrowIfNull();
 		await connection.PublishAsync($"quiz.update.{userId}", new GrainStateChangedEvent()
 		{

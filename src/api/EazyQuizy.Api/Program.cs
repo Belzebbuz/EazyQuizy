@@ -1,9 +1,11 @@
 using System.Globalization;
+using System.Net.WebSockets;
 using EazyQuizy.Api.Extensions;
 using EazyQuizy.Api.GrpcServices;
 using EazyQuizy.Api.GrpcServices.Interceptors;
 using EazyQuizy.Api.Infrastructure.Extensions;
 using EazyQuizy.Common.HashiVault;
+using Microsoft.Extensions.FileProviders;
 
 StaticLogger.EnsureInitialized();
 Log.Information("Server Booting Up...");
@@ -28,6 +30,7 @@ try
 	{
 		options.Interceptors.Add<OrleansMetadataInterceptor>();
 	}).AddJsonTranscoding();
+	builder.Services.AddControllers();
 	var app = builder.Build();
 	
 	app.UseSwagger();
@@ -44,11 +47,11 @@ try
 	{
 		DefaultEnabled = true
 	});
-	
 	app.UseStaticFiles();
 	app.MapFallbackToFile("index.html");
 	app.MapGrpcService<QuizGrpcService>().RequireCors("default");
 	app.MapGrpcService<FileGrpcService>().RequireCors("default");
+	app.MapControllers();
 	app.Run();
 }
 catch (Exception ex)
