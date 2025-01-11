@@ -1,0 +1,18 @@
+<div class="w-full flex flex-col justify-start items-center gap-2">
+  <div
+    (paste)="onPaste($event)"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    class="w-full h-2/3 border shadow-md card shape-card flex flex-row justify-center items-center overflow-hidden">
+    <img *ngIf="imageUrl" [src]="imageUrl" class="object-contain w-full h-full max-w-[838px] max-h-[873px] dark:text-gray-700 text-center" alt="Можно добавить картинку...">
+    <div *ngIf="!imageUrl" class="flex flex-col justify-center items-center">
+      <span> Можно добавить картинку...</span>
+      <span class="mt-5 text-sm text-light-text-placeholder">Вставьте из буффера или перетащите</span>
+      <app-arrow class="mt-1 text-light-text-placeholder animate-bounce" />
+    </div>
+  </div>
+  <input type="file"
+         accept=".jpg, .png, .jpeg"
+         class="file-input w-full" (change)="onFileSelected($event.target)"/>
+  <button [disabled]="!imageUrl" (click)="clearImage()" class="btn-secondary shape-btn-secondary w-full">Удалить картинку</button>
+</div>

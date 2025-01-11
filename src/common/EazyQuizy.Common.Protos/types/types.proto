@@ -1,11 +1,60 @@
 ﻿syntax = "proto3";
-
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 option csharp_namespace = "EazyQuizy.Common.Grpc.Types";
-
 message GrainStateChangedEvent {
   string id = 1;
 }
+message TimerUpdateEvent {
+  int32 start_value = 1;
+  int32 value = 2;
+}
+
 message AddTagsToQuizRequest{
   repeated string tags = 1;
   string quizId = 2;
 }
+
+message QuizInfo {
+  string id = 1;
+  string name = 2;
+  google.protobuf.StringValue image_url = 3;
+  google.protobuf.Timestamp modified_at = 4;
+  repeated string tags = 5;
+  bool can_create_lobby = 6;
+}
+
+message QuestionShortInfo{
+  string id = 1;
+  int32 order = 2;
+  string text = 3;
+  QuestionType question_type = 4;
+}
+
+message PageInfo {
+  int32 total_count = 2;
+  int32 current_page = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+  bool has_prev_page = 6;
+  bool has_next_page = 7;
+}
+
+enum QuestionType {
+  SingleAnswer = 0;
+  MultipleAnswers = 1;
+  RangeAnswer = 2;
+  OrderAnswers = 3;
+}
+
+message OrderedValue {
+  string value = 1;
+  int32 order = 2;
+}
+
+message StatusResponse {
+  string operation_id = 1;
+  bool succeeded = 2;
+  google.protobuf.StringValue message = 3;
+  map<string,string> parameters = 4;
+};

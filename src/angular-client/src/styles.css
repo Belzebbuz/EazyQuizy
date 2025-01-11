@@ -5,3 +5,176 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+body {
+  @apply font-feature subpixel-antialiased bg-main;
+}
+
+/* ==== Кнопки ==== */
+
+/* Основная кнопка */
+.btn-primary {
+  @apply bg-light-main-accent text-light-bg-main hover:bg-light-hover disabled:bg-light-disabled disabled:text-light-text-placeholder
+  dark:bg-dark-main-accent dark:text-dark-bg-main dark:hover:bg-dark-hover dark:disabled:bg-dark-disabled dark:disabled:text-dark-text-placeholder;
+  transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+}
+
+.shape-btn-primary {
+  @apply px-4 py-2 rounded-lg text-xl shadow-md disabled:cursor-not-allowed;
+}
+
+/* Второстепенная кнопка */
+.btn-secondary {
+  @apply
+  border border-light-main-accent dark:border-dark-main-accent
+  bg-light-bg-light text-light-main-accent hover:bg-light-bg-main disabled:bg-light-disabled disabled:text-light-text-placeholder
+  dark:bg-dark-bg-card dark:text-dark-main-accent dark:hover:bg-dark-divider dark:disabled:bg-dark-disabled dark:disabled:text-dark-text-placeholder;
+  transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+}
+.btn-delete {
+  @apply
+  border border-light-main-accent dark:border-dark-main-accent
+  bg-light-bg-light text-status-error-light hover:bg-light-bg-main disabled:bg-light-disabled disabled:text-light-text-placeholder
+  dark:bg-dark-bg-card dark:text-status-error-dark dark:hover:bg-dark-divider dark:disabled:bg-dark-disabled dark:disabled:text-dark-text-placeholder;
+  transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+}
+.shape-btn-secondary {
+  @apply px-4 py-2 text-lg rounded-md border border-light-divider dark:border-dark-divider disabled:cursor-not-allowed;
+}
+
+/* ==== Инпуты ==== */
+
+.input {
+  @apply bg-light-bg-main text-light-text-main placeholder-light-text-placeholder
+  focus:ring-2 focus:ring-gray-300 focus:outline-none
+  focus:border-light-main-accent disabled:bg-light-disabled disabled:text-light-text-placeholder
+  dark:bg-dark-bg-card dark:text-dark-text-main dark:placeholder-dark-text-placeholder dark:focus:border-dark-main-accent dark:disabled:bg-dark-disabled dark:disabled:text-dark-text-placeholder;
+}
+
+.shape-input {
+  @apply w-full px-3 py-2 rounded-md border border-light-light-accent dark:border-dark-dark-accent;
+}
+
+/* ==== Карточки ==== */
+
+.card {
+  @apply bg-light-bg-card text-light-text-secondary shadow-shadow-card-light
+  dark:bg-dark-bg-card dark:text-dark-text-secondary dark:shadow-shadow-card-dark;
+}
+
+.shape-card {
+  @apply rounded-lg p-4 border border-light-divider dark:border-dark-divider;
+}
+
+/* ==== Текст ==== */
+
+.text-primary {
+  @apply text-light-text-main dark:text-dark-text-main;
+}
+
+.text-secondary {
+  @apply text-light-text-secondary dark:text-dark-text-secondary;
+}
+
+.text-placeholder {
+  @apply text-light-text-placeholder dark:text-dark-text-placeholder;
+}
+
+/* ==== Фон ==== */
+
+.bg-main {
+  @apply bg-light-bg-main dark:bg-dark-bg-main;
+  transition: background-color .4s ease-in-out
+}
+
+.bg-light {
+  @apply bg-light-bg-light dark:bg-dark-bg-card;
+}
+.lobby-col{
+  @apply h-full w-full rounded border flex flex-col gap-2 justify-start items-center p-4 bg-light-bg-light;
+}
+.hz-hover-btn {
+  @apply btn-secondary shape-btn-primary;
+}
+.hz-hover-btn-hovered {
+  @apply absolute cursor-pointer bg-dark-hover z-0 w-[100%] h-[0%] top-[50%] left-[50%];
+  transform: translate(-50%, -50%);
+}
+
+.file-input {
+  @apply text-lg px-8 py-3  border border-gray-300  shadow rounded-lg
+  dark:file:bg-gray-200 dark:file:text-gray-700 dark:text-gray-200 dark:border-gray-500 dark:file:hover:bg-gray-400
+  file:cursor-pointer file:mr-4 file:py-4 file:-my-6 file:-ml-8 file:bg-light-main-accent file:hover:bg-light-hover
+  file:text-light-bg-main file:rounded-none file:outline-none file:border-0 file:border-solid file:border-inherit;
+  transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+}
+
+.cdk-drag-placeholder {
+  @apply opacity-30
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.cdk-drag-preview{
+  @apply drop-shadow-2xl
+}
+
+@layer base {
+  @font-face {
+    font-family: 'Expine';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/fonts/Expine-Normal.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Expine';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url(/assets/fonts/Expine-Inverse.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'FeatureMono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/fonts/FeatureMono-Medium.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'RG';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/fonts/RG-StandardBold.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'RG';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url(/assets/fonts/RG-StandardMedium.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Esqadero';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/fonts/Esqadero-Regular.woff2) format('woff2');
+  }
+}

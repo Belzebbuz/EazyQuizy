@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {firstValueFrom, Observable} from 'rxjs';
+import {firstValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

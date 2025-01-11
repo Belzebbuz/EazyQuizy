@@ -11,7 +11,8 @@ public class OrleansMetadataInterceptor : Interceptor
 		UnaryServerMethod<TRequest, TResponse> continuation)
 	{
 		var httpContext = context.GetHttpContext();
-		var id = httpContext.User.FindFirstValue("sub");
+		var id = httpContext.User.FindFirstValue("sub") ??
+		         context.RequestHeaders.FirstOrDefault(x => x.Key == "x-player-id")?.Value;
 		var name = httpContext.User.FindFirstValue("name");
 		RequestContext.Set(RequestKeys.UserId, id);
 		RequestContext.Set(RequestKeys.Name, name);

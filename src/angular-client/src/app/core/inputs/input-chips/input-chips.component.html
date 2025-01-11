@@ -1,0 +1,20 @@
+<div *ngIf="controlArray" [formGroup]="form">
+  <label for="{{controlName}}" class="block text-sm font-medium mb-2">{{label}}</label>
+  <div class="flex flex-row w-full gap-2">
+    <input
+      id="{{controlName}}"
+      type="text"
+      [(ngModel)]="currentInputValue"
+      [ngModelOptions]="{ standalone: true }"
+      class="input shape-input"
+      placeholder="Введите текст и нажмите Добавить" />
+    <button type="button" (click)="addValue()" class="btn-secondary shape-btn-secondary">Добавить</button>
+  </div>
+  <div class="flex flex-wrap gap-2 mt-2">
+        <span
+          *ngFor="let tag of controlArray?.value"
+          class="px-3 py-1 border dark:bg-dark-main-accent border-light-light-accent  text-light-text-main  rounded-full text-sm">
+          {{ tag }} <button (click)="removeValue(tag)" type="button" class="ml-2 text-red-500">×</button>
+        </span>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+<div class="h-svh flex flex-col">
+  <span appSlideTransition class="text-5xl py-5 ml-10 dark:text-gray-200">Вопрос с одним вариантом ответа</span>
+  <div class="h-full grid grid-cols-1 md:grid-cols-2">
+    <app-input-image appContentStagger direction="right" class="flex px-20 pt-10 " [form]="form" controlName="imageUrl" [quizId]="quizId"/>
+    <div appContentStagger class="flex flex-col w-full pt-10 justify-start items-start gap-2 px-20">
+      <form (ngSubmit)="submit()"
+            [formGroup]="form"
+            class="card shape-card flex flex-col gap-2  w-full max-w-2xl" >
+        <app-input-textarea [form]="form" label="Текст вопроса*" controlName="text" />
+        <app-input-textarea [form]="form" label="Правильный ответ*" controlName="correctAnswer"/>
+        <app-input-text-array [form]="form"
+                              [array]="form.controls.wrongAnswers"
+                              label="Неправильные ответы*"
+                              [controlFactory]="answerControlFactory"
+                              />
+        <button [disabled]="!canGenerate" (click)="generateAllAnswers()" class="btn-secondary shape-btn-secondary flex flex-row justify-between items-center gap-2">
+          <app-cpu />
+          <span>ИИ Генерация ответов</span>
+          <app-cpu />
+        </button>
+        <button [disabled]="form.invalid || isLoading" (click)="submit()" class="btn-primary shape-btn-primary">{{questionId ? 'Сохранить вопрос' : 'Создать вопрос'}}</button>
+      </form>
+      <div  *ngIf="serverError" class="rounded w-full border max-w-2xl px-3 py-1 border-red-300 bg-red-100">
+        <span class="text-red-600" >{{serverError}}</span>
+      </div>
+    </div>
+  </div>
+</div>

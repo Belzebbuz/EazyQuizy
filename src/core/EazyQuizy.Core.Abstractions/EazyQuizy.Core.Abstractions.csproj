@@ -7,17 +7,14 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="ErrorOr" Version="2.0.1" />
-        <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="9.0.0" />
-        <PackageReference Include="Microsoft.Orleans.Sdk" Version="9.0.0" />
-        <PackageReference Include="Microsoft.Orleans.Serialization.Protobuf" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Orleans.Clustering.Redis" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Orleans.Sdk" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Orleans.Serialization.Protobuf" Version="9.0.1" />
         <PackageReference Include="System.Text.Json" Version="9.0.0" />
-        <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\common\EazyQuizy.Common.Protos\EazyQuizy.Common.Protos.csproj" />
       <ProjectReference Include="..\..\common\EazyQuizy.Common\EazyQuizy.Common.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Grains\Quiz\Models\" />
     </ItemGroup>
 </Project>

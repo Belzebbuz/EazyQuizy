@@ -17,7 +17,7 @@ public class FileGrpcService: FileService.FileServiceBase
 	{
 		var userId = context.GetHttpContext().User.FindFirstValue("sub").ThrowIfNull();
 		var sizeMeta = context.RequestHeaders.FirstOrDefault(x => x.Key == "x-file-size").ThrowIfNull();
-		long? size = long.TryParse(sizeMeta.Value.Value, out var intSize) ? intSize : default;
+		long? size = long.TryParse(sizeMeta.Value.Value, out var intSize) ? intSize : null;
 		size.ThrowIfNull();
 		if (size > 1024 * 1024 * 2)
 			throw new ArgumentException("Размер файла не может превышать 2МБ");
@@ -29,7 +29,7 @@ public class FileGrpcService: FileService.FileServiceBase
 		Directory.CreateDirectory(directory);
 		var fileName = $"{Guid.CreateVersion7()}.{extension.Value.Value}";
 		var fullPath = Path.Combine(directory, fileName);
-		var url = $"{root}/{fileName}";
+		var url = $"{root}{fileName}";
 		await using var fileWriter = File.Create(fullPath);
 		await streamReader.CopyToAsync(fileWriter);
 		fileWriter.Close();

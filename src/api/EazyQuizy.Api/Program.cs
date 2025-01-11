@@ -1,11 +1,11 @@
 using System.Globalization;
-using System.Net.WebSockets;
+using EazyQuizy.Api;
 using EazyQuizy.Api.Extensions;
 using EazyQuizy.Api.GrpcServices;
 using EazyQuizy.Api.GrpcServices.Interceptors;
 using EazyQuizy.Api.Infrastructure.Extensions;
+using EazyQuizy.Api.Middlewares;
 using EazyQuizy.Common.HashiVault;
-using Microsoft.Extensions.FileProviders;
 
 StaticLogger.EnsureInitialized();
 Log.Information("Server Booting Up...");
@@ -31,6 +31,7 @@ try
 		options.Interceptors.Add<OrleansMetadataInterceptor>();
 	}).AddJsonTranscoding();
 	builder.Services.AddControllers();
+	builder.Services.AddScoped<OrleansMetadataMiddleware>();
 	var app = builder.Build();
 	
 	app.UseSwagger();
@@ -43,14 +44,18 @@ try
 	app.UseCors("default");
 	app.UseAuthentication();
 	app.UseAuthorization();
+	app.UseMiddleware<OrleansMetadataMiddleware>();
 	app.UseGrpcWeb(new GrpcWebOptions()
 	{
 		DefaultEnabled = true
 	});
 	app.UseStaticFiles();
-	app.MapFallbackToFile("index.html");
+	app.MapFallbackToFile("index.html").AllowAnonymous();
 	app.MapGrpcService<QuizGrpcService>().RequireCors("default");
 	app.MapGrpcService<FileGrpcService>().RequireCors("default");
+	app.MapGrpcService<LobbyGrpcService>().RequireCors("default");
+	app.MapGrpcService<GameGrpcService>().RequireCors("default");
+	app.MapGrpcService<AuthGrpcService>().RequireCors("default");
 	app.MapControllers();
 	app.Run();
 }

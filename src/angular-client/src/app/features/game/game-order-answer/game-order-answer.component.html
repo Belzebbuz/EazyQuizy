@@ -1,0 +1,26 @@
+<div *ngIf="question" class="flex flex-col items-center p-10 w-full h-full">
+  <span class="text-3xl self-start">Восстанови правильный порядок</span>
+  <app-game-image *ngIf="question.imageUrl" [questionImageUrl]="question.imageUrl"/>
+  <div class="my-10 w-full border rounded border-gray-400 p-4">
+    {{question.text}}
+  </div>
+  <div *ngIf="!player.answered" cdkDropList (cdkDropListDropped)="drop($event)" class="flex flex-col w-full gap-2">
+    <button *ngFor="let answer of question.answers; index as i"
+            [disabled]="player.answered"
+             cdkDrag class="flex flex-row justify-center gap-2 w-full items-center">
+      <div cdkDragHandle class="btn-secondary shape-btn-secondary hover:cursor-move">
+        <app-arrows-pointing-out />
+      </div>
+      <div class="w-full px-4 py-3 rounded bg-gray-100 border border-light-light-accent disabled:bg-gray-600 hover:bg-gray-200">{{answer}}</div>
+      <button (click)="up(i)" class="btn-secondary shape-btn-secondary">
+        <app-arrow />
+      </button>
+      <button (click)="down(i)" class="btn-secondary shape-btn-secondary">
+        <app-arrow className="rotate-180 size-6" />
+      </button>
+    </button>
+  </div>
+  <div class="mt-2 flex flex-row w-full justify-center items-center">
+    <button (click)="setAnswer()" [disabled]="player.answered || isLoading" class="btn-primary shape-btn-primary w-2/3">Отправить ответ</button>
+  </div>
+</div>

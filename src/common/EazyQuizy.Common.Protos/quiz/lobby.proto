@@ -1,0 +1,75 @@
+syntax = "proto3";
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "types/types.proto";
+option csharp_namespace = "EazyQuizy.Common.Grpc.Lobby";
+
+service LobbyService {
+  rpc Create(CreateLobbyRequest) returns (StatusResponse);
+  rpc GetInfo(GetLobbyInfoRequest) returns (GetLobbyInfoResponse);
+  rpc UpdateSettings(UpdateLobbySettingsRequest) returns (StatusResponse);
+  rpc ConnectPlayer(ConnectPlayerRequest) returns (StatusResponse);
+  rpc DisconnectPlayer(DisconnectPlayerRequest) returns (StatusResponse);
+  rpc InvitePlayer(InvitePlayerRequest) returns (StatusResponse);
+  rpc RemovePlayer(RemovePlayerRequest) returns (StatusResponse);
+  rpc StartGame(CreateGameRequest) returns (StatusResponse);
+}
+message CreateGameRequest {
+  string lobby_id = 1;
+}
+message GetLobbyInfoRequest {
+  string id = 1;
+}
+message GetLobbyInfoResponse {
+  string id = 1;
+  LobbyQuizInfo quiz_info = 2;
+  string update_channel = 3;
+  LobbySettings settings = 4;
+  LobbyState state = 5;
+  bool can_invite = 6;
+  repeated PlayerInfo players = 7;
+  google.protobuf.StringValue game_id = 8;
+}
+message LobbyQuizInfo {
+  string id = 1;
+  string name = 2;
+}
+message CreateLobbyRequest {
+  string quiz_id = 1;
+  LobbySettings settings = 2;
+}
+message UpdateLobbySettingsRequest {
+  string lobby_id = 1;
+  LobbySettings settings = 2;
+}
+message ConnectPlayerRequest {
+  string lobby_id = 1;
+  string player_name = 2;
+}
+message DisconnectPlayerRequest {
+  string lobby_id = 1;
+}
+message InvitePlayerRequest {
+  string lobby_id = 1;
+  string player_id = 2;
+}
+message RemovePlayerRequest {
+  string lobby_id = 1;
+  string player_id = 2;
+}
+message LobbySettings {
+  int32 time_per_question = 1;
+  bool is_open = 2;
+  int32 max_players_count = 3;
+}
+message PlayerInfo {
+  string id = 1;
+  string name = 2;
+  bool is_owner = 3;
+  bool invited = 4;
+}
+enum LobbyState {
+  created = 0;
+  started = 1;
+  closed = 2;
+}

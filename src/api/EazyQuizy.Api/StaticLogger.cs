@@ -1,5 +1,6 @@
 using System.Globalization;
-using Serilog;
+
+namespace EazyQuizy.Api;
 
 public static class StaticLogger
 {

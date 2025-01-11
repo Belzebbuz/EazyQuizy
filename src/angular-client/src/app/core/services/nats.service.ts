@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import {connect, jwtAuthenticator, NatsConnection, StringCodec, Subscription} from 'nats.ws';
 import {KeycloakService} from 'keycloak-angular';
+import Keycloak from 'keycloak-js';
+import {environment} from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -8,17 +10,15 @@ import {KeycloakService} from 'keycloak-angular';
 export class NatsService {
   connection?: NatsConnection;
 
-  constructor(private readonly keycloak: KeycloakService) {
+  constructor(private readonly keycloak: Keycloak) {
   }
 
   async connect() {
     if(this.connection)
       return;
-    if (!this.keycloak.isLoggedIn())
-      return;
     this.connection = await connect(
       {
-        servers: ["ws://localhost:8080"]
+        servers: [environment.natsWs]
       },
     )
   }

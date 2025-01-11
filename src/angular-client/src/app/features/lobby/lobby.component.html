@@ -1,0 +1,69 @@
+<div *ngIf="!loggedIn" class="relative h-svh flex flex-col justify-center items-center gap-2">
+  <div class="text-2xl">Подключение к лобби</div>
+  <form [formGroup]="form" (ngSubmit)="connect()" class="card shape-card flex flex-col gap-2  w-full max-w-xl">
+    <app-input-text label="Имя игрока" [form]="form" controlName="name"/>
+    <button class="btn-primary shape-btn-primary w-full" type="submit">Подключиться</button>
+  </form>
+</div>
+<div *ngIf="loggedIn && lobbyInfo" class="relative h-svh grid grid-cols-1 md:grid-cols-3 border gap-4 p-10">
+  <!--Запросы-->
+  <div class="lobby-col">
+    <span class="text-xl">Запросы</span>
+    <div *ngFor="let player of waitingPlayers" class="flex flex-row w-full gap-2 justify-center items-center">
+      <div class="rounded px-6 py-3 bg-gray-100 border border-light-main-accent grow">{{ player.name }}</div>
+      <div *ngIf="canUpdate" (click)="removePlayer(player.id)" class="btn-delete shape-btn-secondary cursor-pointer">
+        <app-trash className="w-5 h-5"/>
+      </div>
+      <div *ngIf="canUpdate && lobbyInfo.canInvite" (click)="addPlayer(player.id)"
+           class="btn-secondary shape-btn-secondary cursor-pointer">
+        <app-plus className="w-5 h-5 "/>
+      </div>
+    </div>
+  </div>
+  <!--  Добавленные-->
+  <div class="lobby-col">
+    <span class="text-xl">Участники</span>
+    <div *ngFor="let player of invitedPlayers" class="flex flex-row w-full gap-2 justify-center items-center">
+      <div class="rounded px-6 py-3 bg-gray-100 border border-light-main-accent grow">{{ player.name }}</div>
+      <div *ngIf="canUpdate" (click)="removePlayer(player.id)" class="btn-delete shape-btn-secondary cursor-pointer">
+        <app-trash className="w-5 h-5"/>
+      </div>
+    </div>
+  </div>
+  <!--  Настройки-->
+  <div class="lobby-col">
+    <div class="flex flex-row text-4xl">
+      {{ lobbyInfo.quizInfo?.name }}
+    </div>
+    <span class="text-xl">Настройки</span>
+    <form [formGroup]="settingsForm" class="shape-card flex flex-col gap-2  w-full">
+      <app-input-number label="Максимальное кол-во участников" [form]="settingsForm" controlName="maxPlayersCount"/>
+      <app-input-number label="Сколько времени дается на решение воопроса в секундах" [form]="settingsForm"
+                        controlName="timePerQuestion"/>
+      <label class="flex items-center cursor-pointer my-2">
+        <div class="relative">
+          <input type="checkbox" class="sr-only" formControlName="isOpen"/>
+          <div class="w-10 h-4 bg-light-bg-main border border-light-light-accent rounded-full shadow-inner"
+               [class.bg-gray-400]="!settingsForm.controls.isOpen.value"
+          ></div>
+          <div
+            class="dot absolute w-6 h-6 bg-white border-light-main-accent border rounded-full shadow -left-1 -top-1 transition transform duration-300 ease-in-out"
+            [class.translate-x-full]="settingsForm.controls.isOpen.value"
+            [class.bg-blue-500]="settingsForm.controls.isOpen.value">
+          </div>
+        </div>
+        <span class="ml-3 text-gray-700">Открытое лобби</span>
+      </label>
+      <button (click)="submitSettings()" type="button" [disabled]="!canUpdate"
+              class="btn-secondary shape-btn-secondary">Сохранить
+      </button>
+    </form>
+    <button (click)="startGame()" [disabled]="!canUpdate || isStartingGame" class="w-full btn-primary shape-btn-primary">Начать игру</button>
+    <button *ngIf="lobbyInfo.gameId" [routerLink]="['/game/' + lobbyInfo.gameId]"  class="w-full btn-primary shape-btn-primary">Игра уже идет!</button>
+    <qrcode [qrdata]="fullUrl" [width]="400" [errorCorrectionLevel]="'M'"></qrcode>
+    <div class="text-xl -mt-10">QR-код со ссылкой на лобби</div>
+    <div (click)="copyUrlToClipboard()"
+         class="text-xl text-light-main-accent hover:text-light-dark-accent cursor-pointer mt-4">Скопировать ссылку!
+    </div>
+  </div>
+</div>

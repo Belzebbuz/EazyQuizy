@@ -1,0 +1,21 @@
+<div class="relative pointer-events-none h-svh flex flex-col justify-center">
+  <div id="create-form" class="pointer-events-auto  flex flex-col justify-center items-center gap-2">
+    <span class="text-primary text-2xl">Новый квиз</span>
+    <form [formGroup]="form"
+          (ngSubmit)="submit()"
+          class="card shape-card flex flex-col gap-2  w-full max-w-xl">
+      <app-input-text [form]="form" [label]="'Название*'" [controlName]="'name'"/>
+      <app-input-chips [form]="form" [label]="'Теги'" [controlName]="'tags'"/>
+      <button
+        appTooltip="{{!form.valid ? 'Необходимо заполнить обязательные поля' : undefined}}"
+        type="submit"
+        [disabled]="form.invalid || isLoading"
+        class="btn-primary shape-btn-primary w-full">
+        Создать квиз
+      </button>
+    </form>
+    <div *ngIf="serverError" class="rounded border px-3 py-1 border-red-300 bg-red-100">
+      <span class="text-red-600" >{{serverError}}</span>
+    </div>
+  </div>
+</div>

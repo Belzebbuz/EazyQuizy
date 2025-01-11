@@ -1,0 +1,81 @@
+syntax = "proto3";
+import "types/types.proto";
+import "google/protobuf/wrappers.proto";
+option csharp_namespace = "EazyQuizy.Common.Grpc.Game";
+service GameService {
+  rpc GetGameInfo(GetGameInfoRequest) returns (GetGameInfoResponse);
+  rpc Play(PlayRequest) returns (StatusResponse);
+  rpc SetAnswer(SetAnswerRequest) returns (StatusResponse);
+}
+message PlayRequest {
+  string game_id = 1;
+}
+message GetGameInfoRequest {
+  string game_id = 1;
+}
+
+message GetGameInfoResponse {
+  string game_id = 1;
+  repeated GamePlayerInfo players = 2;
+  CurrentQuestionInfo question = 3;
+  int32 current_question = 4;
+  int32 total_questions = 5;
+  string update_channel = 6;
+  string update_timer_channel = 7;
+  GameInfoStatus status = 8;
+}
+message GamePlayerInfo {
+  string player_id = 1;
+  string player_name = 2;
+  int32 total_points = 3;
+  google.protobuf.Int32Value current_question_points = 4;
+  bool answered = 5;
+}
+
+message CurrentQuestionInfo {
+  QuestionType question_type = 1;
+  GameSingleAnswerQuestionInfo single_answer_question_info = 2;
+  GameMultipleAnswerQuestionInfo multiple_answer_question_info = 3;
+  GameRangeQuestionInfo range_question_info = 4;
+  GameOrderQuestionInfo order_question_info = 5;
+}
+message GameSingleAnswerQuestionInfo {
+  string id = 1;
+  string text = 2;
+  google.protobuf.StringValue image_url = 3;
+  repeated string answers = 4;
+}
+message GameMultipleAnswerQuestionInfo {
+  string id = 1;
+  string text = 2;
+  google.protobuf.StringValue image_url = 3;
+  repeated string answers = 4;
+}
+message GameRangeQuestionInfo {
+  string id = 1;
+  string text = 2;
+  google.protobuf.StringValue image_url = 3;
+  int32 min_value = 4;
+  int32 max_value = 5;
+}
+message GameOrderQuestionInfo {
+  string id = 1;
+  string text = 2;
+  google.protobuf.StringValue image_url = 3;
+  repeated string answers = 4;
+}
+
+message SetAnswerRequest {
+  string game_id = 1;
+  google.protobuf.StringValue single_answer = 2;
+  repeated string multiple_answer = 3;
+  google.protobuf.Int32Value range_answer = 4;
+  repeated OrderedValue ordered_answer = 5;
+}
+
+enum GameInfoStatus{
+ Created = 0;
+ Started = 1;
+ Paused = 2;
+ Completed = 3;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option csharp_namespace = "EazyQuizy.Common.Grpc.Auth";
+service AuthService {
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+}
+
+message IsAuthorizedRequest {
+  string action = 1;
+  string grain_id = 2;
+}
+message IsAuthorizedResponse {
+  bool authorized = 1;
+}

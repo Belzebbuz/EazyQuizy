@@ -1,7 +1,6 @@
 ﻿using EazyQuizy.Api.Configs;
 using Orleans.Configuration;
 using Orleans.Serialization;
-using StackExchange.Redis;
 
 namespace EazyQuizy.Api.Extensions;
 

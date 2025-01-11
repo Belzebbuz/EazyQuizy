@@ -20,11 +20,9 @@ export class FileUploadService {
     metadata.set('x-file-size', file.size.toString());
     metadata.set('x-folder', folder);
     metadata.set('x-extension', extension);
-
     const call = this.client.uploadFile(this.fileToChunks(file), {metadata});
     let lastReport;
     for await  (let report of call){
-      console.log(report)
       lastReport = report;
     }
     return lastReport?.imageUrl;

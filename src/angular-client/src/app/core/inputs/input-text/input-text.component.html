@@ -1,0 +1,9 @@
+<div *ngIf="form && controlName" [formGroup]="form">
+  <label for="{{controlName}}" class="block text-sm font-medium mb-2">{{label}}</label>
+  <input
+    id="{{controlName}}"
+    type="text"
+    formControlName="{{controlName}}"
+    class="input shape-input"
+    placeholder="Введите текст" />
+</div>

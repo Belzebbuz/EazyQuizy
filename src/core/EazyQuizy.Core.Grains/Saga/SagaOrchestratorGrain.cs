@@ -1,6 +1,8 @@
-﻿using EazyQuizy.Common.Grpc.Quiz;
+﻿using EazyQuizy.Common.Grpc.Lobby;
+using EazyQuizy.Common.Grpc.Quiz;
+using EazyQuizy.Common.Grpc.Types;
+using EazyQuizy.Core.Abstractions.Exceptions;
 using EazyQuizy.Core.Abstractions.Grains.SagaOrchestrator;
-using EazyQuizy.Core.Domain.Exceptions;
 using EazyQuizy.Core.Grains.Saga.Abstractions;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
@@ -16,8 +18,15 @@ public class SagaOrchestratorGrain(
 	{
 		public Guid SagaCompositionId { get; } = sagaCompositionId;
 		public Stack<int> EndedSagas { get; } = [];
+		public List<IMessage> SagaMessages { get; } = [];
 	}
 	public Task<StatusResponse> EvaluateSagaAsync(CreateQuizRequest request) 
+		=> StartAsync(request);
+
+	public Task<StatusResponse> EvaluateSagaAsync(CreateLobbyRequest request)
+		=> StartAsync(request);
+
+	public Task<StatusResponse> EvaluateSagaAsync(CreateGameRequest request)
 		=> StartAsync(request);
 
 	private async Task<StatusResponse> StartAsync<TRequest>(TRequest request)
@@ -55,6 +64,7 @@ public class SagaOrchestratorGrain(
 				response.Message = domainException.Message;
 			else
 				response.Message = "Внутренняя ошибка";
+			logger.LogError(e,e.Message);
 			return response;
 		}
 	}

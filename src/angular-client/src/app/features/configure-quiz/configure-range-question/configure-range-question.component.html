@@ -1,0 +1,31 @@
+<div class="h-svh flex flex-col">
+  <span appSlideTransition class="text-3xl md:text-5xl py-5 ml-10 dark:text-gray-200">Вопрос с выбором из диапазона</span>
+  <div class="h-full grid grid-cols-1 md:grid-cols-2">
+    <app-input-image appContentStagger direction="right" class="flex px-20 pt-10 " [form]="form" controlName="imageUrl" [quizId]="quizId"/>
+    <div appContentStagger class="flex flex-col w-full pt-10 justify-start items-start gap-2 px-20">
+      <form (ngSubmit)="submit()"
+            [formGroup]="form"
+            class="card shape-card flex flex-col gap-2  w-full max-w-2xl" >
+        <app-input-textarea [form]="form" label="Текст вопроса*" controlName="text" />
+        <app-input-number [form]="form" controlName="minValue" label="Минимальное значение" />
+        <app-input-number [form]="form" controlName="correctValue" label="Правильное значение" />
+        <app-input-number [form]="form" controlName="maxValue" label="Максимальное значение"  />
+        <div class="ranger h-2 bg-gradient-to-r from-light-light-accent to-light-main-accent rounded-full relative my-8 flex flex-row items-center">
+          <div class="min absolute w-2 h-5 rounded-md bg-gray-300 flex flex-row justify-center items-center">
+            <span class="mb-10">{{form.get('minValue')?.value}}</span>
+          </div>
+          <div class="cur absolute w-2 h-5 rounded-md bg-gray-900 flex flex-row justify-center items-center">
+            <span class="mb-10">{{form.get('correctValue')?.value}}</span>
+          </div>
+          <div class="max absolute w-2 h-5 rounded-md bg-gray-600 flex flex-row justify-center items-center">
+            <span class="mb-10">{{form.get('maxValue')?.value}}</span>
+          </div>
+        </div>
+        <button [disabled]="form.invalid || isLoading || invalidState" (click)="submit()" class="btn-primary shape-btn-primary">{{questionId ? 'Сохранить вопрос' : 'Создать вопрос'}}</button>
+      </form>
+      <div  *ngIf="serverError" class="rounded w-full border max-w-2xl px-3 py-1 border-red-300 bg-red-100">
+        <span class="text-red-600" >{{serverError}}</span>
+      </div>
+    </div>
+  </div>
+</div>

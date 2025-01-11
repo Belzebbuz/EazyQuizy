@@ -6,16 +6,73 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Timestamp } from "../google/protobuf/timestamp";
+import { StringValue } from "../google/protobuf/wrappers";
 
 export const protobufPackage = "";
+
+export enum QuestionType {
+  SingleAnswer = 0,
+  MultipleAnswers = 1,
+  RangeAnswer = 2,
+  OrderAnswers = 3,
+  UNRECOGNIZED = -1,
+}
 
 export interface GrainStateChangedEvent {
   id: string;
 }
 
+export interface TimerUpdateEvent {
+  startValue: number;
+  value: number;
+}
+
 export interface AddTagsToQuizRequest {
   tags: string[];
   quizId: string;
+}
+
+export interface QuizInfo {
+  id: string;
+  name: string;
+  imageUrl: string | undefined;
+  modifiedAt: Date | undefined;
+  tags: string[];
+  canCreateLobby: boolean;
+}
+
+export interface QuestionShortInfo {
+  id: string;
+  order: number;
+  text: string;
+  questionType: QuestionType;
+}
+
+export interface PageInfo {
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface OrderedValue {
+  value: string;
+  order: number;
+}
+
+export interface StatusResponse {
+  operationId: string;
+  succeeded: boolean;
+  message: string | undefined;
+  parameters: { [key: string]: string };
+}
+
+export interface StatusResponse_ParametersEntry {
+  key: string;
+  value: string;
 }
 
 function createBaseGrainStateChangedEvent(): GrainStateChangedEvent {
@@ -60,6 +117,64 @@ export const GrainStateChangedEvent: MessageFns<GrainStateChangedEvent> = {
   fromPartial(object: DeepPartial<GrainStateChangedEvent>): GrainStateChangedEvent {
     const message = createBaseGrainStateChangedEvent();
     message.id = object.id ?? "";
+    return message;
+  },
+};
+
+function createBaseTimerUpdateEvent(): TimerUpdateEvent {
+  return { startValue: 0, value: 0 };
+}
+
+export const TimerUpdateEvent: MessageFns<TimerUpdateEvent> = {
+  encode(message: TimerUpdateEvent, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.startValue !== 0) {
+      writer.uint32(8).int32(message.startValue);
+    }
+    if (message.value !== 0) {
+      writer.uint32(16).int32(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TimerUpdateEvent {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTimerUpdateEvent();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.startValue = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.value = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<TimerUpdateEvent>): TimerUpdateEvent {
+    return TimerUpdateEvent.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<TimerUpdateEvent>): TimerUpdateEvent {
+    const message = createBaseTimerUpdateEvent();
+    message.startValue = object.startValue ?? 0;
+    message.value = object.value ?? 0;
     return message;
   },
 };
@@ -122,6 +237,509 @@ export const AddTagsToQuizRequest: MessageFns<AddTagsToQuizRequest> = {
   },
 };
 
+function createBaseQuizInfo(): QuizInfo {
+  return { id: "", name: "", imageUrl: undefined, modifiedAt: undefined, tags: [], canCreateLobby: false };
+}
+
+export const QuizInfo: MessageFns<QuizInfo> = {
+  encode(message: QuizInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(26).fork()).join();
+    }
+    if (message.modifiedAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.modifiedAt), writer.uint32(34).fork()).join();
+    }
+    for (const v of message.tags) {
+      writer.uint32(42).string(v!);
+    }
+    if (message.canCreateLobby !== false) {
+      writer.uint32(48).bool(message.canCreateLobby);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QuizInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuizInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.modifiedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.tags.push(reader.string());
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.canCreateLobby = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<QuizInfo>): QuizInfo {
+    return QuizInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<QuizInfo>): QuizInfo {
+    const message = createBaseQuizInfo();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.modifiedAt = object.modifiedAt ?? undefined;
+    message.tags = object.tags?.map((e) => e) || [];
+    message.canCreateLobby = object.canCreateLobby ?? false;
+    return message;
+  },
+};
+
+function createBaseQuestionShortInfo(): QuestionShortInfo {
+  return { id: "", order: 0, text: "", questionType: 0 };
+}
+
+export const QuestionShortInfo: MessageFns<QuestionShortInfo> = {
+  encode(message: QuestionShortInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.order !== 0) {
+      writer.uint32(16).int32(message.order);
+    }
+    if (message.text !== "") {
+      writer.uint32(26).string(message.text);
+    }
+    if (message.questionType !== 0) {
+      writer.uint32(32).int32(message.questionType);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): QuestionShortInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuestionShortInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.order = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.text = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.questionType = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<QuestionShortInfo>): QuestionShortInfo {
+    return QuestionShortInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<QuestionShortInfo>): QuestionShortInfo {
+    const message = createBaseQuestionShortInfo();
+    message.id = object.id ?? "";
+    message.order = object.order ?? 0;
+    message.text = object.text ?? "";
+    message.questionType = object.questionType ?? 0;
+    return message;
+  },
+};
+
+function createBasePageInfo(): PageInfo {
+  return { totalCount: 0, currentPage: 0, pageSize: 0, totalPages: 0, hasPrevPage: false, hasNextPage: false };
+}
+
+export const PageInfo: MessageFns<PageInfo> = {
+  encode(message: PageInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.totalCount !== 0) {
+      writer.uint32(16).int32(message.totalCount);
+    }
+    if (message.currentPage !== 0) {
+      writer.uint32(24).int32(message.currentPage);
+    }
+    if (message.pageSize !== 0) {
+      writer.uint32(32).int32(message.pageSize);
+    }
+    if (message.totalPages !== 0) {
+      writer.uint32(40).int32(message.totalPages);
+    }
+    if (message.hasPrevPage !== false) {
+      writer.uint32(48).bool(message.hasPrevPage);
+    }
+    if (message.hasNextPage !== false) {
+      writer.uint32(56).bool(message.hasNextPage);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PageInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePageInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalCount = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.currentPage = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.pageSize = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.totalPages = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.hasPrevPage = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.hasNextPage = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<PageInfo>): PageInfo {
+    return PageInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<PageInfo>): PageInfo {
+    const message = createBasePageInfo();
+    message.totalCount = object.totalCount ?? 0;
+    message.currentPage = object.currentPage ?? 0;
+    message.pageSize = object.pageSize ?? 0;
+    message.totalPages = object.totalPages ?? 0;
+    message.hasPrevPage = object.hasPrevPage ?? false;
+    message.hasNextPage = object.hasNextPage ?? false;
+    return message;
+  },
+};
+
+function createBaseOrderedValue(): OrderedValue {
+  return { value: "", order: 0 };
+}
+
+export const OrderedValue: MessageFns<OrderedValue> = {
+  encode(message: OrderedValue, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.value !== "") {
+      writer.uint32(10).string(message.value);
+    }
+    if (message.order !== 0) {
+      writer.uint32(16).int32(message.order);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderedValue {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderedValue();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.order = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<OrderedValue>): OrderedValue {
+    return OrderedValue.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<OrderedValue>): OrderedValue {
+    const message = createBaseOrderedValue();
+    message.value = object.value ?? "";
+    message.order = object.order ?? 0;
+    return message;
+  },
+};
+
+function createBaseStatusResponse(): StatusResponse {
+  return { operationId: "", succeeded: false, message: undefined, parameters: {} };
+}
+
+export const StatusResponse: MessageFns<StatusResponse> = {
+  encode(message: StatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.operationId !== "") {
+      writer.uint32(10).string(message.operationId);
+    }
+    if (message.succeeded !== false) {
+      writer.uint32(16).bool(message.succeeded);
+    }
+    if (message.message !== undefined) {
+      StringValue.encode({ value: message.message! }, writer.uint32(26).fork()).join();
+    }
+    Object.entries(message.parameters).forEach(([key, value]) => {
+      StatusResponse_ParametersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join();
+    });
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.operationId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.succeeded = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.message = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          const entry4 = StatusResponse_ParametersEntry.decode(reader, reader.uint32());
+          if (entry4.value !== undefined) {
+            message.parameters[entry4.key] = entry4.value;
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<StatusResponse>): StatusResponse {
+    return StatusResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<StatusResponse>): StatusResponse {
+    const message = createBaseStatusResponse();
+    message.operationId = object.operationId ?? "";
+    message.succeeded = object.succeeded ?? false;
+    message.message = object.message ?? undefined;
+    message.parameters = Object.entries(object.parameters ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = globalThis.String(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseStatusResponse_ParametersEntry(): StatusResponse_ParametersEntry {
+  return { key: "", value: "" };
+}
+
+export const StatusResponse_ParametersEntry: MessageFns<StatusResponse_ParametersEntry> = {
+  encode(message: StatusResponse_ParametersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StatusResponse_ParametersEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStatusResponse_ParametersEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
+    return StatusResponse_ParametersEntry.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
+    const message = createBaseStatusResponse_ParametersEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
@@ -129,6 +747,18 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+function toTimestamp(date: Date): Timestamp {
+  const seconds = Math.trunc(date.getTime() / 1_000);
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
+  return { seconds, nanos };
+}
+
+function fromTimestamp(t: Timestamp): Date {
+  let millis = (t.seconds || 0) * 1_000;
+  millis += (t.nanos || 0) / 1_000_000;
+  return new globalThis.Date(millis);
+}
 
 export interface MessageFns<T> {
   encode(message: T, writer?: BinaryWriter): BinaryWriter;

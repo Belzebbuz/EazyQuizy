@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using EazyQuizy.Core.Grains.Authorize;
-using Serilog;
-using Throw;
+﻿using System.Net;
+using System.Reflection;
+using EazyQuizy.Core.Abstractions.Exceptions;
+using EazyQuizy.Core.Abstractions.Grains.Authorize;
 
 namespace EazyQuizy.Core.Grains.Common;
 
@@ -21,7 +21,8 @@ public class AuthGrainFilter(IGrainFactory factory) : IIncomingGrainCallFilter
 		{
 			var authGrain = factory.GetGrain<IAuthorizationGrain>(context.TargetContext.GrainId.GetGuidKey());
 			var canHandle = await authGrain.EvaluatePolicyAsync(needAuthorize.ActionType);
-			canHandle.Throw("Unauthorized").IfFalse();
+			if(!canHandle)
+				throw DomainException.Create("Нет доступа", HttpStatusCode.Unauthorized);
 		}
 		await context.Invoke();
 	}

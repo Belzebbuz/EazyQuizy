@@ -1,5 +1,4 @@
-﻿using EazyQuizy.Common.Grpc.Quiz;
-using EazyQuizy.Common.Grpc.Types;
+﻿using EazyQuizy.Common.Grpc.Types;
 
 namespace EazyQuizy.Core.Abstractions.Grains.Tags;
 

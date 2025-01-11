@@ -1,0 +1,11 @@
+<div *ngIf="quiz" class="grid grid-cols-1 md:grid-cols-2 h-svh w-full">
+  <div class="absolute blur-[2px] inset-0 overflow-hidden opacity-20 h-svh pointer-events-none">
+    <div class="relative w-full h-full flex items-center">
+      <app-typewriter class="text-[500px] text-light-text-secondary dark:text-gray-100 select-none leading-none" [texts]="bgTexts"/>
+    </div>
+  </div>
+  <!--Текущее состояние-->
+  <app-quiz-info class="px-10  pt-10" [quiz]="quiz" [questions]="questions" [onDelete]="updateQuiz"/>
+  <!--Выбор типа вопроса-->
+  <app-select-question class="px-10 pt-10" [quizId]="quizId"/>
+</div>

@@ -8,8 +8,17 @@
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import { type CallContext, type CallOptions } from "nice-grpc-common";
 import { StringValue } from "../google/protobuf/wrappers";
+import { OrderedValue, PageInfo, QuestionShortInfo, QuizInfo, StatusResponse } from "../types/types";
 
 export const protobufPackage = "";
+
+export enum OrderBy {
+  ModifiedAtDesc = 0,
+  ModifiedAtAsc = 1,
+  NameDesc = 2,
+  NameAsc = 3,
+  UNRECOGNIZED = -1,
+}
 
 export interface CreateQuizRequest {
   name: string;
@@ -21,10 +30,90 @@ export interface CreateQuizResponse {
   id: string;
 }
 
-export interface AddQuestionRequest {
-  id: string;
-  singleAnswerQuestion: AddSingleQuestionRequest | undefined;
-  multipleAnswerQuestion: AddMultipleQuestionRequest | undefined;
+export interface DeleteQuizRequest {
+  quizId: string;
+}
+
+export interface DeleteQuestionRequest {
+  quizId: string;
+  questionId: string;
+}
+
+export interface GetQuestionInfoRequest {
+  quizId: string;
+  questionId: string;
+}
+
+export interface GetQuestionInfoResponse {
+  singleQuestionInfo: SingleQuestionInfo | undefined;
+  multipleQuestionInfo: MultipleQuestionInfo | undefined;
+  rangeQuestionInfo: RangeQuestionInfo | undefined;
+  orderQuestionInfo: OrderQuestionInfo | undefined;
+}
+
+export interface SingleQuestionInfo {
+  text: string;
+  correctAnswer: string;
+  wrongAnswers: string[];
+  imageUrl: string | undefined;
+  questionId: string | undefined;
+}
+
+export interface MultipleQuestionInfo {
+  text: string;
+  correctAnswers: string[];
+  wrongAnswers: string[];
+  imageUrl: string | undefined;
+  questionId: string | undefined;
+}
+
+export interface RangeQuestionInfo {
+  text: string;
+  correctValue: number;
+  minValue: number;
+  maxValue: number;
+  imageUrl: string | undefined;
+  questionId: string | undefined;
+}
+
+export interface OrderQuestionInfo {
+  text: string;
+  values: OrderedValue[];
+  imageUrl: string | undefined;
+  questionId: string | undefined;
+}
+
+export interface AddSingleQuestionRequest {
+  quizId: string;
+  info: SingleQuestionInfo | undefined;
+}
+
+export interface AddMultipleQuestionRequest {
+  quizId: string;
+  info: MultipleQuestionInfo | undefined;
+}
+
+export interface AddRangeQuestionRequest {
+  quizId: string;
+  info: RangeQuestionInfo | undefined;
+}
+
+export interface AddOrderQuestionRequest {
+  quizId: string;
+  info: OrderQuestionInfo | undefined;
+}
+
+export interface SearchUserQuizRequest {
+  searchString: string | undefined;
+  tags: string[];
+  orderBy: OrderBy;
+  page: number;
+  pageSize: number;
+}
+
+export interface SearchUserQuizResponse {
+  quizzes: QuizInfo[];
+  pageInfo: PageInfo | undefined;
 }
 
 export interface GetQuizInfoRequest {
@@ -32,36 +121,25 @@ export interface GetQuizInfoRequest {
 }
 
 export interface GetQuizInfoResponse {
-  id: string;
-  name: string;
-  imageUrl: string | undefined;
-  questions: string[];
+  quiz: QuizInfo | undefined;
+  questions: QuestionShortInfo[];
 }
 
-export interface AddSingleQuestionRequest {
-  quizId: string;
+export interface GenerateWrongAnswersRequest {
   text: string;
-  correctAnswer: string;
-  wrongAnswers: string[];
+  count: number;
 }
 
-export interface AddMultipleQuestionRequest {
+export interface GenerateWrongAnswersResponse {
+  answers: string[];
+  success: boolean;
+  error: string | undefined;
+}
+
+export interface SetQuestionNewOrderRequest {
   quizId: string;
-  text: string;
-  correctAnswers: string[];
-  wrongAnswers: string[];
-}
-
-export interface StatusResponse {
-  operationId: string;
-  succeeded: boolean;
-  message: string | undefined;
-  parameters: { [key: string]: string };
-}
-
-export interface StatusResponse_ParametersEntry {
-  key: string;
-  value: string;
+  questionId: string;
+  newOrder: number;
 }
 
 function createBaseCreateQuizRequest(): CreateQuizRequest {
@@ -180,28 +258,22 @@ export const CreateQuizResponse: MessageFns<CreateQuizResponse> = {
   },
 };
 
-function createBaseAddQuestionRequest(): AddQuestionRequest {
-  return { id: "", singleAnswerQuestion: undefined, multipleAnswerQuestion: undefined };
+function createBaseDeleteQuizRequest(): DeleteQuizRequest {
+  return { quizId: "" };
 }
 
-export const AddQuestionRequest: MessageFns<AddQuestionRequest> = {
-  encode(message: AddQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.singleAnswerQuestion !== undefined) {
-      AddSingleQuestionRequest.encode(message.singleAnswerQuestion, writer.uint32(18).fork()).join();
-    }
-    if (message.multipleAnswerQuestion !== undefined) {
-      AddMultipleQuestionRequest.encode(message.multipleAnswerQuestion, writer.uint32(26).fork()).join();
+export const DeleteQuizRequest: MessageFns<DeleteQuizRequest> = {
+  encode(message: DeleteQuizRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): AddQuestionRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteQuizRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddQuestionRequest();
+    const message = createBaseDeleteQuizRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -210,23 +282,7 @@ export const AddQuestionRequest: MessageFns<AddQuestionRequest> = {
             break;
           }
 
-          message.id = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.singleAnswerQuestion = AddSingleQuestionRequest.decode(reader, reader.uint32());
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.multipleAnswerQuestion = AddMultipleQuestionRequest.decode(reader, reader.uint32());
+          message.quizId = reader.string();
           continue;
         }
       }
@@ -238,19 +294,993 @@ export const AddQuestionRequest: MessageFns<AddQuestionRequest> = {
     return message;
   },
 
-  create(base?: DeepPartial<AddQuestionRequest>): AddQuestionRequest {
-    return AddQuestionRequest.fromPartial(base ?? {});
+  create(base?: DeepPartial<DeleteQuizRequest>): DeleteQuizRequest {
+    return DeleteQuizRequest.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<AddQuestionRequest>): AddQuestionRequest {
-    const message = createBaseAddQuestionRequest();
-    message.id = object.id ?? "";
-    message.singleAnswerQuestion = (object.singleAnswerQuestion !== undefined && object.singleAnswerQuestion !== null)
-      ? AddSingleQuestionRequest.fromPartial(object.singleAnswerQuestion)
+  fromPartial(object: DeepPartial<DeleteQuizRequest>): DeleteQuizRequest {
+    const message = createBaseDeleteQuizRequest();
+    message.quizId = object.quizId ?? "";
+    return message;
+  },
+};
+
+function createBaseDeleteQuestionRequest(): DeleteQuestionRequest {
+  return { quizId: "", questionId: "" };
+}
+
+export const DeleteQuestionRequest: MessageFns<DeleteQuestionRequest> = {
+  encode(message: DeleteQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.questionId !== "") {
+      writer.uint32(18).string(message.questionId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteQuestionRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteQuestionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.questionId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<DeleteQuestionRequest>): DeleteQuestionRequest {
+    return DeleteQuestionRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<DeleteQuestionRequest>): DeleteQuestionRequest {
+    const message = createBaseDeleteQuestionRequest();
+    message.quizId = object.quizId ?? "";
+    message.questionId = object.questionId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetQuestionInfoRequest(): GetQuestionInfoRequest {
+  return { quizId: "", questionId: "" };
+}
+
+export const GetQuestionInfoRequest: MessageFns<GetQuestionInfoRequest> = {
+  encode(message: GetQuestionInfoRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.questionId !== "") {
+      writer.uint32(18).string(message.questionId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetQuestionInfoRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetQuestionInfoRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.questionId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<GetQuestionInfoRequest>): GetQuestionInfoRequest {
+    return GetQuestionInfoRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetQuestionInfoRequest>): GetQuestionInfoRequest {
+    const message = createBaseGetQuestionInfoRequest();
+    message.quizId = object.quizId ?? "";
+    message.questionId = object.questionId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetQuestionInfoResponse(): GetQuestionInfoResponse {
+  return {
+    singleQuestionInfo: undefined,
+    multipleQuestionInfo: undefined,
+    rangeQuestionInfo: undefined,
+    orderQuestionInfo: undefined,
+  };
+}
+
+export const GetQuestionInfoResponse: MessageFns<GetQuestionInfoResponse> = {
+  encode(message: GetQuestionInfoResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.singleQuestionInfo !== undefined) {
+      SingleQuestionInfo.encode(message.singleQuestionInfo, writer.uint32(10).fork()).join();
+    }
+    if (message.multipleQuestionInfo !== undefined) {
+      MultipleQuestionInfo.encode(message.multipleQuestionInfo, writer.uint32(18).fork()).join();
+    }
+    if (message.rangeQuestionInfo !== undefined) {
+      RangeQuestionInfo.encode(message.rangeQuestionInfo, writer.uint32(26).fork()).join();
+    }
+    if (message.orderQuestionInfo !== undefined) {
+      OrderQuestionInfo.encode(message.orderQuestionInfo, writer.uint32(34).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetQuestionInfoResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetQuestionInfoResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.singleQuestionInfo = SingleQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.multipleQuestionInfo = MultipleQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.rangeQuestionInfo = RangeQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.orderQuestionInfo = OrderQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<GetQuestionInfoResponse>): GetQuestionInfoResponse {
+    return GetQuestionInfoResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<GetQuestionInfoResponse>): GetQuestionInfoResponse {
+    const message = createBaseGetQuestionInfoResponse();
+    message.singleQuestionInfo = (object.singleQuestionInfo !== undefined && object.singleQuestionInfo !== null)
+      ? SingleQuestionInfo.fromPartial(object.singleQuestionInfo)
       : undefined;
-    message.multipleAnswerQuestion =
-      (object.multipleAnswerQuestion !== undefined && object.multipleAnswerQuestion !== null)
-        ? AddMultipleQuestionRequest.fromPartial(object.multipleAnswerQuestion)
-        : undefined;
+    message.multipleQuestionInfo = (object.multipleQuestionInfo !== undefined && object.multipleQuestionInfo !== null)
+      ? MultipleQuestionInfo.fromPartial(object.multipleQuestionInfo)
+      : undefined;
+    message.rangeQuestionInfo = (object.rangeQuestionInfo !== undefined && object.rangeQuestionInfo !== null)
+      ? RangeQuestionInfo.fromPartial(object.rangeQuestionInfo)
+      : undefined;
+    message.orderQuestionInfo = (object.orderQuestionInfo !== undefined && object.orderQuestionInfo !== null)
+      ? OrderQuestionInfo.fromPartial(object.orderQuestionInfo)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseSingleQuestionInfo(): SingleQuestionInfo {
+  return { text: "", correctAnswer: "", wrongAnswers: [], imageUrl: undefined, questionId: undefined };
+}
+
+export const SingleQuestionInfo: MessageFns<SingleQuestionInfo> = {
+  encode(message: SingleQuestionInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.text !== "") {
+      writer.uint32(10).string(message.text);
+    }
+    if (message.correctAnswer !== "") {
+      writer.uint32(18).string(message.correctAnswer);
+    }
+    for (const v of message.wrongAnswers) {
+      writer.uint32(26).string(v!);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(34).fork()).join();
+    }
+    if (message.questionId !== undefined) {
+      StringValue.encode({ value: message.questionId! }, writer.uint32(42).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SingleQuestionInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSingleQuestionInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.text = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.correctAnswer = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.wrongAnswers.push(reader.string());
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.questionId = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<SingleQuestionInfo>): SingleQuestionInfo {
+    return SingleQuestionInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SingleQuestionInfo>): SingleQuestionInfo {
+    const message = createBaseSingleQuestionInfo();
+    message.text = object.text ?? "";
+    message.correctAnswer = object.correctAnswer ?? "";
+    message.wrongAnswers = object.wrongAnswers?.map((e) => e) || [];
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.questionId = object.questionId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseMultipleQuestionInfo(): MultipleQuestionInfo {
+  return { text: "", correctAnswers: [], wrongAnswers: [], imageUrl: undefined, questionId: undefined };
+}
+
+export const MultipleQuestionInfo: MessageFns<MultipleQuestionInfo> = {
+  encode(message: MultipleQuestionInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.text !== "") {
+      writer.uint32(10).string(message.text);
+    }
+    for (const v of message.correctAnswers) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.wrongAnswers) {
+      writer.uint32(26).string(v!);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(34).fork()).join();
+    }
+    if (message.questionId !== undefined) {
+      StringValue.encode({ value: message.questionId! }, writer.uint32(42).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MultipleQuestionInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMultipleQuestionInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.text = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.correctAnswers.push(reader.string());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.wrongAnswers.push(reader.string());
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.questionId = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<MultipleQuestionInfo>): MultipleQuestionInfo {
+    return MultipleQuestionInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<MultipleQuestionInfo>): MultipleQuestionInfo {
+    const message = createBaseMultipleQuestionInfo();
+    message.text = object.text ?? "";
+    message.correctAnswers = object.correctAnswers?.map((e) => e) || [];
+    message.wrongAnswers = object.wrongAnswers?.map((e) => e) || [];
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.questionId = object.questionId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseRangeQuestionInfo(): RangeQuestionInfo {
+  return { text: "", correctValue: 0, minValue: 0, maxValue: 0, imageUrl: undefined, questionId: undefined };
+}
+
+export const RangeQuestionInfo: MessageFns<RangeQuestionInfo> = {
+  encode(message: RangeQuestionInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.text !== "") {
+      writer.uint32(10).string(message.text);
+    }
+    if (message.correctValue !== 0) {
+      writer.uint32(16).int32(message.correctValue);
+    }
+    if (message.minValue !== 0) {
+      writer.uint32(24).int32(message.minValue);
+    }
+    if (message.maxValue !== 0) {
+      writer.uint32(32).int32(message.maxValue);
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(42).fork()).join();
+    }
+    if (message.questionId !== undefined) {
+      StringValue.encode({ value: message.questionId! }, writer.uint32(50).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RangeQuestionInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRangeQuestionInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.text = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.correctValue = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.minValue = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.maxValue = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.questionId = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<RangeQuestionInfo>): RangeQuestionInfo {
+    return RangeQuestionInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RangeQuestionInfo>): RangeQuestionInfo {
+    const message = createBaseRangeQuestionInfo();
+    message.text = object.text ?? "";
+    message.correctValue = object.correctValue ?? 0;
+    message.minValue = object.minValue ?? 0;
+    message.maxValue = object.maxValue ?? 0;
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.questionId = object.questionId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseOrderQuestionInfo(): OrderQuestionInfo {
+  return { text: "", values: [], imageUrl: undefined, questionId: undefined };
+}
+
+export const OrderQuestionInfo: MessageFns<OrderQuestionInfo> = {
+  encode(message: OrderQuestionInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.text !== "") {
+      writer.uint32(10).string(message.text);
+    }
+    for (const v of message.values) {
+      OrderedValue.encode(v!, writer.uint32(18).fork()).join();
+    }
+    if (message.imageUrl !== undefined) {
+      StringValue.encode({ value: message.imageUrl! }, writer.uint32(26).fork()).join();
+    }
+    if (message.questionId !== undefined) {
+      StringValue.encode({ value: message.questionId! }, writer.uint32(34).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderQuestionInfo {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderQuestionInfo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.text = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.values.push(OrderedValue.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.questionId = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<OrderQuestionInfo>): OrderQuestionInfo {
+    return OrderQuestionInfo.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<OrderQuestionInfo>): OrderQuestionInfo {
+    const message = createBaseOrderQuestionInfo();
+    message.text = object.text ?? "";
+    message.values = object.values?.map((e) => OrderedValue.fromPartial(e)) || [];
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.questionId = object.questionId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseAddSingleQuestionRequest(): AddSingleQuestionRequest {
+  return { quizId: "", info: undefined };
+}
+
+export const AddSingleQuestionRequest: MessageFns<AddSingleQuestionRequest> = {
+  encode(message: AddSingleQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.info !== undefined) {
+      SingleQuestionInfo.encode(message.info, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddSingleQuestionRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddSingleQuestionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.info = SingleQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<AddSingleQuestionRequest>): AddSingleQuestionRequest {
+    return AddSingleQuestionRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<AddSingleQuestionRequest>): AddSingleQuestionRequest {
+    const message = createBaseAddSingleQuestionRequest();
+    message.quizId = object.quizId ?? "";
+    message.info = (object.info !== undefined && object.info !== null)
+      ? SingleQuestionInfo.fromPartial(object.info)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseAddMultipleQuestionRequest(): AddMultipleQuestionRequest {
+  return { quizId: "", info: undefined };
+}
+
+export const AddMultipleQuestionRequest: MessageFns<AddMultipleQuestionRequest> = {
+  encode(message: AddMultipleQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.info !== undefined) {
+      MultipleQuestionInfo.encode(message.info, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddMultipleQuestionRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddMultipleQuestionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.info = MultipleQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<AddMultipleQuestionRequest>): AddMultipleQuestionRequest {
+    return AddMultipleQuestionRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<AddMultipleQuestionRequest>): AddMultipleQuestionRequest {
+    const message = createBaseAddMultipleQuestionRequest();
+    message.quizId = object.quizId ?? "";
+    message.info = (object.info !== undefined && object.info !== null)
+      ? MultipleQuestionInfo.fromPartial(object.info)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseAddRangeQuestionRequest(): AddRangeQuestionRequest {
+  return { quizId: "", info: undefined };
+}
+
+export const AddRangeQuestionRequest: MessageFns<AddRangeQuestionRequest> = {
+  encode(message: AddRangeQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.info !== undefined) {
+      RangeQuestionInfo.encode(message.info, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddRangeQuestionRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddRangeQuestionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.info = RangeQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<AddRangeQuestionRequest>): AddRangeQuestionRequest {
+    return AddRangeQuestionRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<AddRangeQuestionRequest>): AddRangeQuestionRequest {
+    const message = createBaseAddRangeQuestionRequest();
+    message.quizId = object.quizId ?? "";
+    message.info = (object.info !== undefined && object.info !== null)
+      ? RangeQuestionInfo.fromPartial(object.info)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseAddOrderQuestionRequest(): AddOrderQuestionRequest {
+  return { quizId: "", info: undefined };
+}
+
+export const AddOrderQuestionRequest: MessageFns<AddOrderQuestionRequest> = {
+  encode(message: AddOrderQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.info !== undefined) {
+      OrderQuestionInfo.encode(message.info, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddOrderQuestionRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddOrderQuestionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.info = OrderQuestionInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<AddOrderQuestionRequest>): AddOrderQuestionRequest {
+    return AddOrderQuestionRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<AddOrderQuestionRequest>): AddOrderQuestionRequest {
+    const message = createBaseAddOrderQuestionRequest();
+    message.quizId = object.quizId ?? "";
+    message.info = (object.info !== undefined && object.info !== null)
+      ? OrderQuestionInfo.fromPartial(object.info)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseSearchUserQuizRequest(): SearchUserQuizRequest {
+  return { searchString: undefined, tags: [], orderBy: 0, page: 0, pageSize: 0 };
+}
+
+export const SearchUserQuizRequest: MessageFns<SearchUserQuizRequest> = {
+  encode(message: SearchUserQuizRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.searchString !== undefined) {
+      StringValue.encode({ value: message.searchString! }, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.tags) {
+      writer.uint32(18).string(v!);
+    }
+    if (message.orderBy !== 0) {
+      writer.uint32(24).int32(message.orderBy);
+    }
+    if (message.page !== 0) {
+      writer.uint32(32).int32(message.page);
+    }
+    if (message.pageSize !== 0) {
+      writer.uint32(40).int32(message.pageSize);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SearchUserQuizRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSearchUserQuizRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.searchString = StringValue.decode(reader, reader.uint32()).value;
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.tags.push(reader.string());
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.orderBy = reader.int32() as any;
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.page = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.pageSize = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<SearchUserQuizRequest>): SearchUserQuizRequest {
+    return SearchUserQuizRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SearchUserQuizRequest>): SearchUserQuizRequest {
+    const message = createBaseSearchUserQuizRequest();
+    message.searchString = object.searchString ?? undefined;
+    message.tags = object.tags?.map((e) => e) || [];
+    message.orderBy = object.orderBy ?? 0;
+    message.page = object.page ?? 0;
+    message.pageSize = object.pageSize ?? 0;
+    return message;
+  },
+};
+
+function createBaseSearchUserQuizResponse(): SearchUserQuizResponse {
+  return { quizzes: [], pageInfo: undefined };
+}
+
+export const SearchUserQuizResponse: MessageFns<SearchUserQuizResponse> = {
+  encode(message: SearchUserQuizResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.quizzes) {
+      QuizInfo.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.pageInfo !== undefined) {
+      PageInfo.encode(message.pageInfo, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SearchUserQuizResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSearchUserQuizResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizzes.push(QuizInfo.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.pageInfo = PageInfo.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<SearchUserQuizResponse>): SearchUserQuizResponse {
+    return SearchUserQuizResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SearchUserQuizResponse>): SearchUserQuizResponse {
+    const message = createBaseSearchUserQuizResponse();
+    message.quizzes = object.quizzes?.map((e) => QuizInfo.fromPartial(e)) || [];
+    message.pageInfo = (object.pageInfo !== undefined && object.pageInfo !== null)
+      ? PageInfo.fromPartial(object.pageInfo)
+      : undefined;
     return message;
   },
 };
@@ -302,22 +1332,16 @@ export const GetQuizInfoRequest: MessageFns<GetQuizInfoRequest> = {
 };
 
 function createBaseGetQuizInfoResponse(): GetQuizInfoResponse {
-  return { id: "", name: "", imageUrl: undefined, questions: [] };
+  return { quiz: undefined, questions: [] };
 }
 
 export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
   encode(message: GetQuizInfoResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.name !== "") {
-      writer.uint32(18).string(message.name);
-    }
-    if (message.imageUrl !== undefined) {
-      StringValue.encode({ value: message.imageUrl! }, writer.uint32(26).fork()).join();
+    if (message.quiz !== undefined) {
+      QuizInfo.encode(message.quiz, writer.uint32(10).fork()).join();
     }
     for (const v of message.questions) {
-      writer.uint32(34).string(v!);
+      QuestionShortInfo.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -334,7 +1358,7 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
             break;
           }
 
-          message.id = reader.string();
+          message.quiz = QuizInfo.decode(reader, reader.uint32());
           continue;
         }
         case 2: {
@@ -342,23 +1366,7 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
             break;
           }
 
-          message.name = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.imageUrl = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.questions.push(reader.string());
+          message.questions.push(QuestionShortInfo.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -375,212 +1383,40 @@ export const GetQuizInfoResponse: MessageFns<GetQuizInfoResponse> = {
   },
   fromPartial(object: DeepPartial<GetQuizInfoResponse>): GetQuizInfoResponse {
     const message = createBaseGetQuizInfoResponse();
-    message.id = object.id ?? "";
-    message.name = object.name ?? "";
-    message.imageUrl = object.imageUrl ?? undefined;
-    message.questions = object.questions?.map((e) => e) || [];
+    message.quiz = (object.quiz !== undefined && object.quiz !== null) ? QuizInfo.fromPartial(object.quiz) : undefined;
+    message.questions = object.questions?.map((e) => QuestionShortInfo.fromPartial(e)) || [];
     return message;
   },
 };
 
-function createBaseAddSingleQuestionRequest(): AddSingleQuestionRequest {
-  return { quizId: "", text: "", correctAnswer: "", wrongAnswers: [] };
+function createBaseGenerateWrongAnswersRequest(): GenerateWrongAnswersRequest {
+  return { text: "", count: 0 };
 }
 
-export const AddSingleQuestionRequest: MessageFns<AddSingleQuestionRequest> = {
-  encode(message: AddSingleQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.quizId !== "") {
-      writer.uint32(10).string(message.quizId);
-    }
+export const GenerateWrongAnswersRequest: MessageFns<GenerateWrongAnswersRequest> = {
+  encode(message: GenerateWrongAnswersRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.text !== "") {
-      writer.uint32(18).string(message.text);
+      writer.uint32(10).string(message.text);
     }
-    if (message.correctAnswer !== "") {
-      writer.uint32(26).string(message.correctAnswer);
-    }
-    for (const v of message.wrongAnswers) {
-      writer.uint32(34).string(v!);
+    if (message.count !== 0) {
+      writer.uint32(16).int32(message.count);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): AddSingleQuestionRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): GenerateWrongAnswersRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddSingleQuestionRequest();
+    const message = createBaseGenerateWrongAnswersRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           if (tag !== 10) {
-            break;
-          }
-
-          message.quizId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
             break;
           }
 
           message.text = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.correctAnswer = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.wrongAnswers.push(reader.string());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  create(base?: DeepPartial<AddSingleQuestionRequest>): AddSingleQuestionRequest {
-    return AddSingleQuestionRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<AddSingleQuestionRequest>): AddSingleQuestionRequest {
-    const message = createBaseAddSingleQuestionRequest();
-    message.quizId = object.quizId ?? "";
-    message.text = object.text ?? "";
-    message.correctAnswer = object.correctAnswer ?? "";
-    message.wrongAnswers = object.wrongAnswers?.map((e) => e) || [];
-    return message;
-  },
-};
-
-function createBaseAddMultipleQuestionRequest(): AddMultipleQuestionRequest {
-  return { quizId: "", text: "", correctAnswers: [], wrongAnswers: [] };
-}
-
-export const AddMultipleQuestionRequest: MessageFns<AddMultipleQuestionRequest> = {
-  encode(message: AddMultipleQuestionRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.quizId !== "") {
-      writer.uint32(10).string(message.quizId);
-    }
-    if (message.text !== "") {
-      writer.uint32(18).string(message.text);
-    }
-    for (const v of message.correctAnswers) {
-      writer.uint32(26).string(v!);
-    }
-    for (const v of message.wrongAnswers) {
-      writer.uint32(34).string(v!);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): AddMultipleQuestionRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddMultipleQuestionRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.quizId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.text = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.correctAnswers.push(reader.string());
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.wrongAnswers.push(reader.string());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  create(base?: DeepPartial<AddMultipleQuestionRequest>): AddMultipleQuestionRequest {
-    return AddMultipleQuestionRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<AddMultipleQuestionRequest>): AddMultipleQuestionRequest {
-    const message = createBaseAddMultipleQuestionRequest();
-    message.quizId = object.quizId ?? "";
-    message.text = object.text ?? "";
-    message.correctAnswers = object.correctAnswers?.map((e) => e) || [];
-    message.wrongAnswers = object.wrongAnswers?.map((e) => e) || [];
-    return message;
-  },
-};
-
-function createBaseStatusResponse(): StatusResponse {
-  return { operationId: "", succeeded: false, message: undefined, parameters: {} };
-}
-
-export const StatusResponse: MessageFns<StatusResponse> = {
-  encode(message: StatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.operationId !== "") {
-      writer.uint32(10).string(message.operationId);
-    }
-    if (message.succeeded !== false) {
-      writer.uint32(16).bool(message.succeeded);
-    }
-    if (message.message !== undefined) {
-      StringValue.encode({ value: message.message! }, writer.uint32(26).fork()).join();
-    }
-    Object.entries(message.parameters).forEach(([key, value]) => {
-      StatusResponse_ParametersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join();
-    });
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): StatusResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStatusResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.operationId = reader.string();
           continue;
         }
         case 2: {
@@ -588,26 +1424,7 @@ export const StatusResponse: MessageFns<StatusResponse> = {
             break;
           }
 
-          message.succeeded = reader.bool();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.message = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          const entry4 = StatusResponse_ParametersEntry.decode(reader, reader.uint32());
-          if (entry4.value !== undefined) {
-            message.parameters[entry4.key] = entry4.value;
-          }
+          message.count = reader.int32();
           continue;
         }
       }
@@ -619,46 +1436,39 @@ export const StatusResponse: MessageFns<StatusResponse> = {
     return message;
   },
 
-  create(base?: DeepPartial<StatusResponse>): StatusResponse {
-    return StatusResponse.fromPartial(base ?? {});
+  create(base?: DeepPartial<GenerateWrongAnswersRequest>): GenerateWrongAnswersRequest {
+    return GenerateWrongAnswersRequest.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<StatusResponse>): StatusResponse {
-    const message = createBaseStatusResponse();
-    message.operationId = object.operationId ?? "";
-    message.succeeded = object.succeeded ?? false;
-    message.message = object.message ?? undefined;
-    message.parameters = Object.entries(object.parameters ?? {}).reduce<{ [key: string]: string }>(
-      (acc, [key, value]) => {
-        if (value !== undefined) {
-          acc[key] = globalThis.String(value);
-        }
-        return acc;
-      },
-      {},
-    );
+  fromPartial(object: DeepPartial<GenerateWrongAnswersRequest>): GenerateWrongAnswersRequest {
+    const message = createBaseGenerateWrongAnswersRequest();
+    message.text = object.text ?? "";
+    message.count = object.count ?? 0;
     return message;
   },
 };
 
-function createBaseStatusResponse_ParametersEntry(): StatusResponse_ParametersEntry {
-  return { key: "", value: "" };
+function createBaseGenerateWrongAnswersResponse(): GenerateWrongAnswersResponse {
+  return { answers: [], success: false, error: undefined };
 }
 
-export const StatusResponse_ParametersEntry: MessageFns<StatusResponse_ParametersEntry> = {
-  encode(message: StatusResponse_ParametersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.key !== "") {
-      writer.uint32(10).string(message.key);
+export const GenerateWrongAnswersResponse: MessageFns<GenerateWrongAnswersResponse> = {
+  encode(message: GenerateWrongAnswersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.answers) {
+      writer.uint32(10).string(v!);
     }
-    if (message.value !== "") {
-      writer.uint32(18).string(message.value);
+    if (message.success !== false) {
+      writer.uint32(16).bool(message.success);
+    }
+    if (message.error !== undefined) {
+      StringValue.encode({ value: message.error! }, writer.uint32(26).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): StatusResponse_ParametersEntry {
+  decode(input: BinaryReader | Uint8Array, length?: number): GenerateWrongAnswersResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStatusResponse_ParametersEntry();
+    const message = createBaseGenerateWrongAnswersResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -667,15 +1477,23 @@ export const StatusResponse_ParametersEntry: MessageFns<StatusResponse_Parameter
             break;
           }
 
-          message.key = reader.string();
+          message.answers.push(reader.string());
           continue;
         }
         case 2: {
-          if (tag !== 18) {
+          if (tag !== 16) {
             break;
           }
 
-          message.value = reader.string();
+          message.success = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.error = StringValue.decode(reader, reader.uint32()).value;
           continue;
         }
       }
@@ -687,13 +1505,84 @@ export const StatusResponse_ParametersEntry: MessageFns<StatusResponse_Parameter
     return message;
   },
 
-  create(base?: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
-    return StatusResponse_ParametersEntry.fromPartial(base ?? {});
+  create(base?: DeepPartial<GenerateWrongAnswersResponse>): GenerateWrongAnswersResponse {
+    return GenerateWrongAnswersResponse.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<StatusResponse_ParametersEntry>): StatusResponse_ParametersEntry {
-    const message = createBaseStatusResponse_ParametersEntry();
-    message.key = object.key ?? "";
-    message.value = object.value ?? "";
+  fromPartial(object: DeepPartial<GenerateWrongAnswersResponse>): GenerateWrongAnswersResponse {
+    const message = createBaseGenerateWrongAnswersResponse();
+    message.answers = object.answers?.map((e) => e) || [];
+    message.success = object.success ?? false;
+    message.error = object.error ?? undefined;
+    return message;
+  },
+};
+
+function createBaseSetQuestionNewOrderRequest(): SetQuestionNewOrderRequest {
+  return { quizId: "", questionId: "", newOrder: 0 };
+}
+
+export const SetQuestionNewOrderRequest: MessageFns<SetQuestionNewOrderRequest> = {
+  encode(message: SetQuestionNewOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quizId !== "") {
+      writer.uint32(10).string(message.quizId);
+    }
+    if (message.questionId !== "") {
+      writer.uint32(18).string(message.questionId);
+    }
+    if (message.newOrder !== 0) {
+      writer.uint32(24).int32(message.newOrder);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SetQuestionNewOrderRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSetQuestionNewOrderRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.quizId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.questionId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.newOrder = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<SetQuestionNewOrderRequest>): SetQuestionNewOrderRequest {
+    return SetQuestionNewOrderRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SetQuestionNewOrderRequest>): SetQuestionNewOrderRequest {
+    const message = createBaseSetQuestionNewOrderRequest();
+    message.quizId = object.quizId ?? "";
+    message.questionId = object.questionId ?? "";
+    message.newOrder = object.newOrder ?? 0;
     return message;
   },
 };
@@ -703,6 +1592,22 @@ export const QuizServiceDefinition = {
   name: "QuizService",
   fullName: "QuizService",
   methods: {
+    getQuizInfo: {
+      name: "GetQuizInfo",
+      requestType: GetQuizInfoRequest,
+      requestStream: false,
+      responseType: GetQuizInfoResponse,
+      responseStream: false,
+      options: {},
+    },
+    generateWrongAnswers: {
+      name: "GenerateWrongAnswers",
+      requestType: GenerateWrongAnswersRequest,
+      requestStream: false,
+      responseType: GenerateWrongAnswersResponse,
+      responseStream: false,
+      options: {},
+    },
     create: {
       name: "Create",
       requestType: CreateQuizRequest,
@@ -712,6 +1617,22 @@ export const QuizServiceDefinition = {
       options: {
         _unknownFields: { 578365826: [new Uint8Array([13, 34, 8, 47, 118, 49, 47, 113, 117, 105, 122, 58, 1, 42])] },
       },
+    },
+    addRangeQuestion: {
+      name: "AddRangeQuestion",
+      requestType: AddRangeQuestionRequest,
+      requestStream: false,
+      responseType: StatusResponse,
+      responseStream: false,
+      options: {},
+    },
+    addOrderQuestion: {
+      name: "AddOrderQuestion",
+      requestType: AddOrderQuestionRequest,
+      requestStream: false,
+      responseType: StatusResponse,
+      responseStream: false,
+      options: {},
     },
     addSingleQuestion: {
       name: "AddSingleQuestion",
@@ -787,23 +1708,95 @@ export const QuizServiceDefinition = {
         },
       },
     },
-    getInfo: {
-      name: "GetInfo",
-      requestType: GetQuizInfoRequest,
+    searchUserQuiz: {
+      name: "SearchUserQuiz",
+      requestType: SearchUserQuizRequest,
       requestStream: false,
-      responseType: GetQuizInfoResponse,
+      responseType: SearchUserQuizResponse,
       responseStream: false,
       options: {
         _unknownFields: {
-          578365826: [new Uint8Array([15, 18, 13, 47, 118, 49, 47, 113, 117, 105, 122, 47, 123, 105, 100, 125])],
+          578365826: [
+            new Uint8Array([
+              20,
+              34,
+              15,
+              47,
+              118,
+              49,
+              47,
+              113,
+              117,
+              105,
+              122,
+              47,
+              115,
+              101,
+              97,
+              114,
+              99,
+              104,
+              58,
+              1,
+              42,
+            ]),
+          ],
         },
       },
+    },
+    setQuestionNewOrder: {
+      name: "SetQuestionNewOrder",
+      requestType: SetQuestionNewOrderRequest,
+      requestStream: false,
+      responseType: StatusResponse,
+      responseStream: false,
+      options: {},
+    },
+    getQuestionInfo: {
+      name: "GetQuestionInfo",
+      requestType: GetQuestionInfoRequest,
+      requestStream: false,
+      responseType: GetQuestionInfoResponse,
+      responseStream: false,
+      options: {},
+    },
+    deleteQuiz: {
+      name: "DeleteQuiz",
+      requestType: DeleteQuizRequest,
+      requestStream: false,
+      responseType: StatusResponse,
+      responseStream: false,
+      options: {},
+    },
+    deleteQuestion: {
+      name: "DeleteQuestion",
+      requestType: DeleteQuestionRequest,
+      requestStream: false,
+      responseType: StatusResponse,
+      responseStream: false,
+      options: {},
     },
   },
 } as const;
 
 export interface QuizServiceImplementation<CallContextExt = {}> {
+  getQuizInfo(
+    request: GetQuizInfoRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<GetQuizInfoResponse>>;
+  generateWrongAnswers(
+    request: GenerateWrongAnswersRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<GenerateWrongAnswersResponse>>;
   create(request: CreateQuizRequest, context: CallContext & CallContextExt): Promise<DeepPartial<StatusResponse>>;
+  addRangeQuestion(
+    request: AddRangeQuestionRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<StatusResponse>>;
+  addOrderQuestion(
+    request: AddOrderQuestionRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<StatusResponse>>;
   addSingleQuestion(
     request: AddSingleQuestionRequest,
     context: CallContext & CallContextExt,
@@ -812,14 +1805,43 @@ export interface QuizServiceImplementation<CallContextExt = {}> {
     request: AddMultipleQuestionRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<StatusResponse>>;
-  getInfo(
-    request: GetQuizInfoRequest,
+  searchUserQuiz(
+    request: SearchUserQuizRequest,
     context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<GetQuizInfoResponse>>;
+  ): Promise<DeepPartial<SearchUserQuizResponse>>;
+  setQuestionNewOrder(
+    request: SetQuestionNewOrderRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<StatusResponse>>;
+  getQuestionInfo(
+    request: GetQuestionInfoRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<GetQuestionInfoResponse>>;
+  deleteQuiz(request: DeleteQuizRequest, context: CallContext & CallContextExt): Promise<DeepPartial<StatusResponse>>;
+  deleteQuestion(
+    request: DeleteQuestionRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<StatusResponse>>;
 }
 
 export interface QuizServiceClient<CallOptionsExt = {}> {
+  getQuizInfo(
+    request: DeepPartial<GetQuizInfoRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<GetQuizInfoResponse>;
+  generateWrongAnswers(
+    request: DeepPartial<GenerateWrongAnswersRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<GenerateWrongAnswersResponse>;
   create(request: DeepPartial<CreateQuizRequest>, options?: CallOptions & CallOptionsExt): Promise<StatusResponse>;
+  addRangeQuestion(
+    request: DeepPartial<AddRangeQuestionRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<StatusResponse>;
+  addOrderQuestion(
+    request: DeepPartial<AddOrderQuestionRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<StatusResponse>;
   addSingleQuestion(
     request: DeepPartial<AddSingleQuestionRequest>,
     options?: CallOptions & CallOptionsExt,
@@ -828,10 +1850,23 @@ export interface QuizServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<AddMultipleQuestionRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<StatusResponse>;
-  getInfo(
-    request: DeepPartial<GetQuizInfoRequest>,
+  searchUserQuiz(
+    request: DeepPartial<SearchUserQuizRequest>,
     options?: CallOptions & CallOptionsExt,
-  ): Promise<GetQuizInfoResponse>;
+  ): Promise<SearchUserQuizResponse>;
+  setQuestionNewOrder(
+    request: DeepPartial<SetQuestionNewOrderRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<StatusResponse>;
+  getQuestionInfo(
+    request: DeepPartial<GetQuestionInfoRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<GetQuestionInfoResponse>;
+  deleteQuiz(request: DeepPartial<DeleteQuizRequest>, options?: CallOptions & CallOptionsExt): Promise<StatusResponse>;
+  deleteQuestion(
+    request: DeepPartial<DeleteQuestionRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<StatusResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

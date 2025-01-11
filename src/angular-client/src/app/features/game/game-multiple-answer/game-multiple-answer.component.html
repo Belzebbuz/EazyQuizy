@@ -1,0 +1,19 @@
+<div *ngIf="question" class="flex flex-col items-center p-10 w-full h-full">
+<span class="text-3xl self-start">Выбери несколько правильных вариантов</span>
+  <app-game-image *ngIf="question.imageUrl" [questionImageUrl]="question.imageUrl"/>
+  <div class="my-10 w-full border rounded border-gray-400 p-4">
+    {{question.text}}
+  </div>
+  <div class="flex flex-col w-full gap-2">
+    <button *ngFor="let answer of question.answers"
+            [disabled]="player.answered"
+            (click)="addAnswer(answer)"
+            [class.bg-gray-300]="answerAdded(answer)"
+            class="px-4 py-3 rounded bg-gray-100 border border-light-light-accent disabled:bg-gray-400 hover:bg-gray-200">
+      {{answer}}
+    </button>
+  </div>
+<div class="mt-2 flex flex-row w-full justify-center items-center">
+  <button (click)="setAnswer()" [disabled]="player.answered || isLoading" class="btn-primary shape-btn-primary w-2/3">Отправить ответ</button>
+</div>
+</div>

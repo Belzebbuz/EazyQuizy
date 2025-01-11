@@ -8,3 +8,4 @@ src/files/localhost.pfx
 src/files/localhost.pem
 src/files/localhost-key.pem
 src/files/.env
+*.crt

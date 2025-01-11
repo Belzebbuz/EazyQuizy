@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
-using Throw;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods;
 using VaultSharp.V1.AuthMethods.JWT;

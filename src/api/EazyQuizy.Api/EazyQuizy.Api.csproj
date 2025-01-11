@@ -5,19 +5,22 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
       <UserSecretsId>a288282b-3651-460e-8975-98caaf79650d</UserSecretsId>
+      <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\core\EazyQuizy.Core.Abstractions\EazyQuizy.Core.Abstractions.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.66.0" />
+        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.67.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-        <PackageReference Include="Microsoft.Orleans.Client" Version="9.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Orleans.Client" Version="9.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="wwwroot\" />
+      <Content Include="..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 </Project>

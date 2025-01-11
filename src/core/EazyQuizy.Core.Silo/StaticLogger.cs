@@ -1,5 +1,7 @@
 using System.Globalization;
 
+namespace EazyQuizy.Core.Silo;
+
 public static class StaticLogger
 {
 	public static void EnsureInitialized()

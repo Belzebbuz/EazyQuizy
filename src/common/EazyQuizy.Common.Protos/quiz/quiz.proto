@@ -1,15 +1,20 @@
 syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/protobuf/wrappers.proto";
+import "types/types.proto";
 option csharp_namespace = "EazyQuizy.Common.Grpc.Quiz";
 
 service QuizService {
+  rpc GetQuizInfo(GetQuizInfoRequest) returns (GetQuizInfoResponse);
+  rpc GenerateWrongAnswers(GenerateWrongAnswersRequest) returns (GenerateWrongAnswersResponse);
   rpc Create (CreateQuizRequest) returns (StatusResponse){
     option (google.api.http) = {
       post: "/v1/quiz",
       body: "*"
     };
   }
+  rpc AddRangeQuestion (AddRangeQuestionRequest) returns (StatusResponse);
+  rpc AddOrderQuestion (AddOrderQuestionRequest) returns (StatusResponse);
   rpc AddSingleQuestion (AddSingleQuestionRequest) returns (StatusResponse){
     option (google.api.http) = {
       post: "/v1/quiz/single",
@@ -22,12 +27,18 @@ service QuizService {
       body: "*"
     };
   }
-  rpc GetInfo (GetQuizInfoRequest) returns (GetQuizInfoResponse){
+  rpc SearchUserQuiz (SearchUserQuizRequest) returns (SearchUserQuizResponse){
     option (google.api.http) = {
-      get: "/v1/quiz/{id}",
+      post: "/v1/quiz/search",
+      body: "*"
     };
-  }
+  };
+  rpc SetQuestionNewOrder(SetQuestionNewOrderRequest) returns (StatusResponse);
+  rpc GetQuestionInfo(GetQuestionInfoRequest) returns (GetQuestionInfoResponse);
+  rpc DeleteQuiz(DeleteQuizRequest) returns (StatusResponse);
+  rpc DeleteQuestion(DeleteQuestionRequest) returns (StatusResponse);
 }
+
 message CreateQuizRequest {
   string name = 1;
   google.protobuf.StringValue image_url = 2;
@@ -36,35 +47,110 @@ message CreateQuizRequest {
 message CreateQuizResponse {
   string id = 1;
 }
-message AddQuestionRequest {
-  string id = 1;
-  AddSingleQuestionRequest single_answer_question = 2;
-  AddMultipleQuestionRequest multiple_answer_question = 3;
+message DeleteQuizRequest {
+  string quiz_id = 1;
 }
-message GetQuizInfoRequest{
-  string id = 1;
+message DeleteQuestionRequest {
+  string quiz_id = 1;
+  string question_id = 2;
 }
-message GetQuizInfoResponse {
-  string id = 1;
-  string name = 2;
+message GetQuestionInfoRequest {
+  string quiz_id = 1;
+  string question_id = 2;
+}
+
+message GetQuestionInfoResponse {
+  SingleQuestionInfo single_question_info = 1;
+  MultipleQuestionInfo multiple_question_info = 2;
+  RangeQuestionInfo range_question_info = 3;
+  OrderQuestionInfo order_question_info = 4;
+}
+
+message SingleQuestionInfo {
+  string text = 1;
+  string correct_answer = 2;
+  repeated string wrong_answers = 3;
+  google.protobuf.StringValue image_url = 4;
+  google.protobuf.StringValue question_id = 5;
+}
+message MultipleQuestionInfo {
+  string text = 1;
+  repeated string correct_answers = 2;
+  repeated string wrong_answers = 3;
+  google.protobuf.StringValue image_url = 4;
+  google.protobuf.StringValue question_id = 5;
+}
+message RangeQuestionInfo {
+  string text = 1;
+  int32 correct_value = 2;
+  int32 min_value = 3;
+  int32 max_value = 4;
+  google.protobuf.StringValue image_url = 5;
+  google.protobuf.StringValue question_id = 6;
+}
+message OrderQuestionInfo {
+  string text = 1;
+  repeated OrderedValue values = 2;
   google.protobuf.StringValue image_url = 3;
-  repeated string questions = 4;
+  google.protobuf.StringValue question_id = 4;
 }
 message AddSingleQuestionRequest {
   string quiz_id = 1;
-  string text = 2;
-  string correct_answer = 3;
-  repeated string wrong_answers = 4;
+  SingleQuestionInfo info = 2;
 }
 message AddMultipleQuestionRequest {
   string quiz_id = 1;
-  string text = 2;
-  repeated string correct_answers = 3;
-  repeated string wrong_answers = 4;
+  MultipleQuestionInfo info = 2;
 }
-message StatusResponse {
-  string operation_id = 1;
-  bool succeeded = 2;
-  google.protobuf.StringValue message = 3;
-  map<string,string> parameters = 4;
-};
+message AddRangeQuestionRequest {
+  string quiz_id = 1;
+  RangeQuestionInfo info = 2;
+}
+message AddOrderQuestionRequest {
+  string quiz_id = 1;
+  OrderQuestionInfo info = 2;
+}
+
+message SearchUserQuizRequest {
+  google.protobuf.StringValue search_string = 1;
+  repeated string tags = 2;
+  OrderBy order_by = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+message SearchUserQuizResponse {
+  repeated QuizInfo quizzes = 1;
+  PageInfo pageInfo = 2;
+}
+
+message GetQuizInfoRequest {
+  string id = 1;
+}
+
+message GetQuizInfoResponse {
+  QuizInfo quiz = 1;
+  repeated QuestionShortInfo questions = 2;
+}
+
+enum OrderBy {
+  ModifiedAtDesc = 0;
+  ModifiedAtAsc = 1;
+  NameDesc = 2;
+  NameAsc = 3;
+}
+
+message GenerateWrongAnswersRequest {
+  string text = 1;
+  int32 count = 2;
+}
+message GenerateWrongAnswersResponse {
+  repeated string answers = 1;
+  bool success = 2;
+  google.protobuf.StringValue error = 3;
+}
+
+message SetQuestionNewOrderRequest {
+  string quiz_id = 1;
+  string question_id = 2;
+  int32 new_order = 3;
+}

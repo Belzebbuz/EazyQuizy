@@ -1,6 +1,7 @@
 global using Serilog;
 using System.Globalization;
 using EazyQuizy.Common.HashiVault;
+using EazyQuizy.Core.Silo;
 using EazyQuizy.Core.Silo.Extensions;
 
 StaticLogger.EnsureInitialized();

@@ -5,12 +5,18 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>a288282b-3651-460e-8975-98caaf79650d</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\EazyQuizy.Core.Grains\EazyQuizy.Core.Grains.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Orleans.Server" Version="9.0.1" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 </Project>

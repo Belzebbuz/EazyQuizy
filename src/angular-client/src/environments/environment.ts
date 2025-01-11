@@ -1,6 +1,7 @@
 ﻿export const environment = {
   production: true,
   baseApiUrl: '/api',
-  baseFilesUrl: '',
-  baseGrpcUrl: 'http://127.0.0.1:5530'
+  baseGrpcUrl: "https://easy-quiz.ru",
+  natsWs: "easy-quiz.ru:9280",
+  keycloakRealm: 'easy-quiz',
 };

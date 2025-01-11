@@ -1,0 +1,49 @@
+<div *ngIf="gameInfo && playerId" class="relative h-svh grid grid-cols-1 md:grid-cols-[70%_30%] justify-center items-center gap-2 p-10">
+<!--  ИГРА-->
+  <div class="border bg-light-bg-light border-light-main-accent rounded w-full h-full">
+    <div *ngIf="gameCreated" class="flex flex-col justify-center items-center w-full h-full text-4xl">
+      <span>Приготовьтесь!</span>
+      <span>Игра еще не началась</span>
+    </div>
+    <div *ngIf="gameStarted" class="flex flex-col gap-2 w-full h-full">
+      <ng-container [ngSwitch]="gameInfo.question?.questionType">
+        <app-game-single-answer *ngSwitchCase="QuestionType.SingleAnswer"
+                                [gameId]="gameId"
+                                [player]="currentPlayer"
+                                [question]="gameInfo.question?.singleAnswerQuestionInfo" />
+        <app-game-multiple-answer *ngSwitchCase="QuestionType.MultipleAnswers"
+                                  [gameId]="gameId"
+                                  [player]="currentPlayer"
+                                  [question]="gameInfo.question?.multipleAnswerQuestionInfo"/>
+        <app-game-range-answer *ngSwitchCase="QuestionType.RangeAnswer"
+                               [gameId]="gameId"
+                               [player]="currentPlayer"
+                               [question]="gameInfo.question?.rangeQuestionInfo" />
+        <app-game-order-answer *ngSwitchCase="QuestionType.OrderAnswers"
+                               [question]="gameInfo.question?.orderQuestionInfo"
+                               [gameId]="gameId"
+                               [player]="currentPlayer"/>
+      </ng-container>
+        <div class="full-timer mb-4 relative self-center w-3/4 rounded-full h-2 border border-gray-500 flex flex-row items-center">
+          <div class="timer w-full h-full rounded-full bg-gray-400"></div>
+          <div class="timer-crl absolute -right-1 w-5 h-5 rounded-full bg-gray-600 flex flex-row justify-center items-center">
+            <span class="mt-10">{{pointsLeft}}</span>
+          </div>
+        </div>
+    </div>
+    <div *ngIf="gameCompleted" class="flex flex-col text-5xl w-full h-full items-center justify-center">
+      <span>Игра закончена!</span>
+      <span>Победитель: {{gameInfo.players[0].playerName}}</span>
+    </div>
+  </div>
+<!--  ИГРОКИ-->
+  <div class="lobby-col border-light-main-accent">
+    <button (click)="play()" *ngIf="gameCreated && this.canStartGame" [disabled]="!this.canStartGame" class="btn-primary shape-btn-primary w-full">Начать игру</button>
+    <span *ngIf="gameStarted" class="text-2xl">Вопрос {{gameInfo.currentQuestion}} из {{gameInfo.totalQuestions}}</span>
+    <span class="text-3xl mt-5">Участники</span>
+    <div *ngFor="let player of gameInfo.players" class="flex flex-row w-full gap-2 justify-between items-center rounded px-6 py-3 bg-gray-100 border border-light-main-accent ">
+        <span>{{ player.playerName }}</span>
+        <span>{{ player.totalPoints }}</span>
+    </div>.
+  </div>
+</div>

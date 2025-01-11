@@ -34,6 +34,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Core.Domain", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Common.Protos", "src\common\EazyQuizy.Common.Protos\EazyQuizy.Common.Protos.csproj", "{E139FD26-9704-4371-8ACE-267E7583C024}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{055B065A-C462-4E98-8F14-E8B892E0DBA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EazyQuizy.Core.Tests.Grains", "src\tests\EazyQuizy.Core.Tests.Grains\EazyQuizy.Core.Tests.Grains.csproj", "{1D2261C7-FB0C-4784-A227-593177F7D36C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +56,8 @@ Global
 		{AF47913D-EDC5-47F9-9F37-BBD69E35E0CA} = {F1AF90CD-F865-4DC8-BA9B-1F6A7881E728}
 		{71D1AEB4-C8A9-46A9-BE35-86847A95A0CC} = {5C294B31-84D3-4828-9BB2-D22C60921FD6}
 		{E139FD26-9704-4371-8ACE-267E7583C024} = {F1AF90CD-F865-4DC8-BA9B-1F6A7881E728}
+		{055B065A-C462-4E98-8F14-E8B892E0DBA6} = {703B622E-9670-43FA-9FC0-26965C830672}
+		{1D2261C7-FB0C-4784-A227-593177F7D36C} = {055B065A-C462-4E98-8F14-E8B892E0DBA6}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7F01E9DE-A5B5-4E5C-87A1-258E483D09E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -82,5 +88,9 @@ Global
 		{E139FD26-9704-4371-8ACE-267E7583C024}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E139FD26-9704-4371-8ACE-267E7583C024}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E139FD26-9704-4371-8ACE-267E7583C024}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D2261C7-FB0C-4784-A227-593177F7D36C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D2261C7-FB0C-4784-A227-593177F7D36C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D2261C7-FB0C-4784-A227-593177F7D36C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D2261C7-FB0C-4784-A227-593177F7D36C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

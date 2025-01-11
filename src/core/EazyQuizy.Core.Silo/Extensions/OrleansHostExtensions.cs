@@ -32,12 +32,12 @@ public static class OrleansHostExtensions
 				Url = siloSettings.NatsConfig.ConnectionString,
 				SerializerRegistry = new CastomNatsJsonSerializerRegistry(new JsonSerializerOptions()
 				{
-					PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 				})
 			});
 			silo.Services.AddMarten(options =>
 			{
-				options.Connection("host=127.0.0.1;Port=5433;database=eazy-quizy-documents;Username=postgres;Password=postgres;");
+				options.Connection(siloSettings.PostgresConfig.ConnectionString);
 				options.UseSystemTextJsonForSerialization(new JsonSerializerOptions()
 				{
 					IgnoreReadOnlyFields = true,
@@ -46,6 +46,8 @@ public static class OrleansHostExtensions
 				});
 				options.Schema.For<SagaState>().Index(x => x.SagaId, x => x.SortOrder = SortOrder.Desc);
 				options.Schema.For<Tag>().Index(x => x.Name);
+				options.Schema.For<Quiz>().Index(x => x.UserId);
+				options.Schema.For<Quiz>().Index(x => x.ModifiedAt, x => x.SortOrder = SortOrder.Desc);
 			});
 			silo.Services.AddSagas(typeof(SagaOrchestratorGrain).Assembly);
 			silo.AddIncomingGrainCallFilter<AuthGrainFilter>();

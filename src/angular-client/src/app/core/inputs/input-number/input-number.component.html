@@ -1,0 +1,12 @@
+<div [formGroup]="form" class="flex flex-col">
+  <label for="{{controlName}}" class="block text-sm font-medium mb-2">{{label}}</label>
+  <div class="flex flex-row gap-1">
+    <button (click)="remove()" type="button" class="btn-secondary shape-btn-secondary">
+      <span class="text-3xl">-</span>
+    </button>
+    <input type="number" class="input shape-input w-full text-center" [formControlName]="controlName" />
+    <button  (click)="add()" type="button" class="btn-secondary shape-btn-secondary">
+      <span class="text-3xl">+</span>
+    </button>
+  </div>
+</div>

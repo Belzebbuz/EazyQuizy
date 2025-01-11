@@ -1,5 +1,5 @@
 ﻿using EazyQuizy.Common.Grpc.Quiz;
-using EazyQuizy.Core.Grains.Authorize;
+using EazyQuizy.Core.Abstractions.Grains.Authorize;
 using EazyQuizy.Core.Grains.Saga.Abstractions;
 
 namespace EazyQuizy.Core.Grains.Saga.CreateQuizSagas;

@@ -1,9 +1,7 @@
-﻿using EazyQuizy.Common.Grpc.Quiz;
-using EazyQuizy.Common.Grpc.Types;
+﻿using EazyQuizy.Common.Grpc.Types;
 using EazyQuizy.Core.Abstractions.Grains.Tags;
 using EazyQuizy.Core.Domain.Entities;
 using Marten;
-using Throw;
 
 namespace EazyQuizy.Core.Grains.Tags;
 
@@ -24,13 +22,19 @@ public class TagRepositoryGrain(IDocumentStore store) : Grain, ITagRepositoryGra
 			var tag = existed.FirstOrDefault(x => x.Name == tagName);
 			if (tag is null)
 			{
-				var tagResult = Tag.Create(Guid.CreateVersion7(), tagName, quizIds);
-				tagResult.IsError.Throw(tagResult.FirstError.Description).IfTrue();
-				tag = tagResult.Value;
+				tag = new Tag
+				{
+					Id = Guid.CreateVersion7(),
+					Name = tagName,
+					QuizIds = quizIds
+				};
 			}
 			else
 			{
-				tag.AddQuizIds(quizIds);
+				foreach (var quizId in quizIds)
+				{
+					tag.QuizIds.Add(quizId);
+				}
 			}
 			session.Store(tag);
 		}
@@ -45,7 +49,7 @@ public class TagRepositoryGrain(IDocumentStore store) : Grain, ITagRepositoryGra
 		var tags = await session.Query<Tag>().Where(x => x.QuizIds.Contains(this.GetPrimaryKey())).ToListAsync();
 		foreach (var tag in tags)
 		{
-			tag.RemoveQuizId(this.GetPrimaryKey());
+			tag.QuizIds.Remove(this.GetPrimaryKey());
 		}
 		session.Update(tags);
 		await session.SaveChangesAsync();

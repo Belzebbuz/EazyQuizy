@@ -1,0 +1,14 @@
+<div *ngIf="form && array" [formGroup]="form">
+  <label class="block text-sm mb-2">{{label}}</label>
+  <div class="flex flex-col gap-2 justify-center">
+    <div *ngFor="let control of array.controls; index as i;" class="flex flex-row gap-2 h-full justify-center items-center">
+      <textarea
+        id="{{i}}"
+        [formControl]="control"
+        class="input shape-input"
+        placeholder="Введите текст"></textarea>
+        <button (click)="remove(i)" class="btn-delete shape-btn-secondary" [disabled]="!canRemoveWrongAnswer" type="button">x</button>
+    </div>
+    <button [hidden]="!canAddWrongAnswer" (click)="add()" class="btn-secondary shape-btn-secondary">Добавить вариант ответа</button>
+  </div>
+</div>

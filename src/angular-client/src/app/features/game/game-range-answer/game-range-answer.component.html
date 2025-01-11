@@ -1,0 +1,12 @@
+<div *ngIf="question && form" class="flex flex-col items-center p-10 w-full h-full">
+  <span class="text-3xl self-start">Укажи правильное число</span>
+  <app-game-image *ngIf="question.imageUrl" [questionImageUrl]="question.imageUrl"/>
+  <div class="my-10 w-full border rounded border-gray-400 p-4">
+    {{question.text}}
+  </div>
+  <span class="text-center text-2xl">Минимум: {{question.minValue}} Максимум: {{question.maxValue}}</span>
+  <app-input-number class="w-full" [form]="form" controlName="answer" />
+  <div class="mt-4 flex flex-row w-full justify-center items-center">
+    <button (click)="setAnswer()" [disabled]="player.answered || isLoading || form.invalid" class="btn-primary shape-btn-primary w-2/3">Отправить ответ</button>
+  </div>
+</div>
