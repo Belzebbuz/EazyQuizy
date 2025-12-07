@@ -7,9 +7,19 @@ namespace EazyQuizy.Core.Abstractions.Grains.Lobby;
 public interface ILobbyGrain : IGrainWithGuidKey
 {
 	public Task<StatusResponse> CreateAsync(CreateLobbyRequest request);
+	
+	/// <summary>
+	/// Получает актуальную информацию о состоянии лобби
+	/// </summary>
+	/// <returns></returns>
 	[ReadOnly]
 	Task<GetLobbyInfoResponse> GetInfoAsync();
-
+	/// <summary>
+	/// Получает актуальную информацию о состоянии лобби 2
+	/// </summary>
+	/// <returns></returns>
+	[ReadOnly]
+	Task<GetLobbyInfoResponse> GetInfoAsync(string key);
 	Task<StatusResponse> UpdateSettingsAsync(UpdateLobbySettingsRequest request);
 	Task<StatusResponse> ConnectAsync();
 	Task<StatusResponse> DisconnectAsync();

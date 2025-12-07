@@ -58,6 +58,12 @@ public class LobbyGrain([PersistentState("lobby-state", StorageConstants.RedisSt
 		return Task.FromResult(response);
 	}
 
+	public Task<GetLobbyInfoResponse> GetInfoAsync(string key)
+	{
+		var response = State.State.ToResponse(GetUpdateChannel());
+		return Task.FromResult(response);
+	}
+
 	[ThrowIfNoRecord, StateChanger]
 	[AuthorizeGrain(GrainAccessAction.Update)]
 	public Task<StatusResponse> UpdateSettingsAsync(UpdateLobbySettingsRequest request)
@@ -160,11 +166,12 @@ public class LobbyGrain([PersistentState("lobby-state", StorageConstants.RedisSt
 	{
 		var currentUserName = RequestContext.Get(RequestKeys.Name) as string;
 		currentUserName.ThrowIfNull();
+		var playerId = GetPlayerId();
 		return new Player
 		{
-			Id = GetPlayerId(),
+			Id = playerId,
 			Name = currentUserName,
-			IsOwner = State.State.OwnerId == GetPlayerId(),
+			IsOwner = State.State.OwnerId == playerId, 
 			ConnectedAt = connectedAt,
 			Invited = false
 		};
